@@ -1,0 +1,359 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0B0B0D">
+  <title>DG Estética Automotiva — Gerador de Serviços e Preço</title>
+  
+  <!-- Fontes Oficiais -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Exo+2:ital,wght@0,500;0,700;0,800;0,900;1,700;1,800;1,900&family=Poppins:ital,wght@0,400;0,600;0,700;0,800;0,900;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+  <!-- ======================================================================
+       HEADER / TOPO
+       ====================================================================== -->
+  <header class="header">
+    <div class="brand">
+      <img class="brand-logo" src="assets/logo-dg.png" alt="DG Estética Automotiva">
+      <div class="brand-text">
+        <h1>DG Estética <span>Automotiva</span></h1>
+        <p>Gerador de Cards, Molduras e Balões de Serviço para Storys e Feed</p>
+      </div>
+    </div>
+    <div class="header-badges">
+      <span class="badge-tag">Design System Oficial</span>
+      <span class="badge-tag">Offline & Alta Resolução</span>
+    </div>
+  </header>
+
+  <!-- ======================================================================
+       CONTAINER PRINCIPAL
+       ====================================================================== -->
+  <div class="app-container">
+
+    <!-- ------------------------------------------------------------------
+         PAINEL ESQUERDO: CONTROLES
+         ------------------------------------------------------------------ -->
+    <aside class="panel">
+
+      <!-- PRESETS RÁPIDOS DE SERVIÇOS -->
+      <div class="presets-bar">
+        <span class="presets-label">⚡ Presets Rápidos de Serviços:</span>
+        <div class="presets-list" id="presetsList"></div>
+      </div>
+
+      <!-- FORMATO / ENQUADRAMENTO -->
+      <div class="field-group">
+        <h2 class="section-title">1. Formato & Enquadramento</h2>
+        <div class="options-grid">
+          <button type="button" class="option-card format-card active" data-mode="story">
+            <span class="option-badge">STORY 9:16</span>
+            <strong>Story com Balão</strong>
+            <small>Foto + Logo DG + Balão de Aviso</small>
+          </button>
+          <button type="button" class="option-card format-card" data-mode="molduraStory">
+            <span class="option-badge">OFICIAL DG</span>
+            <strong>Story com Moldura</strong>
+            <small>Usa as molduras vazadas com placa</small>
+          </button>
+          <button type="button" class="option-card format-card" data-mode="feed">
+            <span class="option-badge">FEED 4:5</span>
+            <strong>Post Feed (1080×1350)</strong>
+            <small>Formato clássico do Instagram</small>
+          </button>
+          <button type="button" class="option-card format-card" data-mode="card">
+            <span class="option-badge">TRANSPARENTE</span>
+            <strong>Apenas o Balão (PNG)</strong>
+            <small>Fundo recortado p/ Canva/Instagram</small>
+          </button>
+        </div>
+      </div>
+
+      <!-- SELETOR DE MOLDURAS OFICIAIS (ATIVO NO MODO MOLDURA) -->
+      <div class="field-group" id="sectionMoldura" hidden>
+        <h2 class="section-title">Moldura Oficial DG</h2>
+        <div class="options-grid" id="molduraOptions"></div>
+      </div>
+
+      <!-- SELETOR DE MODELOS DE BALÃO (ATIVO NOS MODOS STORY, FEED E RECORTE) -->
+      <div class="field-group" id="sectionModelos">
+        <h2 class="section-title">2. Estilo do Balão de Aviso</h2>
+        <div class="options-grid" id="modelOptions"></div>
+      </div>
+
+      <!-- FOTO DE FUNDO & ENQUADRAMENTO -->
+      <div class="field-group" id="sectionFoto">
+        <h2 class="section-title">3. Foto do Carro & Enquadramento</h2>
+        
+        <!-- DROPZONE / UPLOAD -->
+        <input type="file" id="fileInput" accept="image/*,video/*" style="display:none;">
+        <div class="dropzone" id="dropzone">
+          <div class="dropzone-icon">📷 🎬</div>
+          <p>Clique ou arraste uma foto ou um vídeo do carro aqui</p>
+          <small>A foto ou o vídeo se ajusta automaticamente ao Story ou Moldura</small>
+        </div>
+
+        <div class="photo-preview-bar" id="photoPreviewBar" hidden>
+          <img class="photo-thumb" id="photoThumb" src="" alt="Prévia">
+          <div class="photo-info">
+            <strong id="photoName">Foto Selecionada</strong>
+            <small>Enquadrada na área do Story</small>
+          </div>
+          <button type="button" class="btn-remove-photo" id="btnRemovePhoto" title="Remover Foto">✕</button>
+        </div>
+
+        <!-- CONTROLES DO VÍDEO DE FUNDO (aparecem só com vídeo carregado) -->
+        <div class="video-controls" id="videoControls" hidden>
+          <div class="video-buttons">
+            <button type="button" class="btn btn-secondary" id="btnVideoPlay">⏯ Pausar / tocar</button>
+            <button type="button" class="btn btn-primary" id="btnVideoRec">🎬 Gravar vídeo com os elementos</button>
+          </div>
+          <label class="video-audio">
+            <input type="checkbox" id="chkVideoAudio" checked>
+            <span>Incluir o áudio do vídeo</span>
+          </label>
+          <small>A gravação roda em tempo real, do início ao fim do vídeo — mantenha esta aba aberta e use resolução 1x. Sai em MP4 quando o navegador permite; senão em WebM. “Baixar imagem” salva o quadro atual.</small>
+        </div>
+
+        <!-- CONTROLES DE ENQUADRAMENTO DA FOTO -->
+        <div class="slider-control" style="margin-top:6px;">
+          <div class="slider-header">
+            <span>Zoom / Escala da Foto:</span>
+            <span class="slider-val" id="valZoom">1.00x</span>
+          </div>
+          <input type="range" id="sliderZoom" min="0.6" max="2.5" step="0.05" value="1.0">
+        </div>
+
+        <div class="field-row">
+          <div class="slider-control">
+            <div class="slider-header">
+              <span>Posição Horizontal (X):</span>
+              <span class="slider-val" id="valPanX">0px</span>
+            </div>
+            <input type="range" id="sliderPanX" min="-400" max="400" step="10" value="0">
+          </div>
+          <div class="slider-control">
+            <div class="slider-header">
+              <span>Posição Vertical (Y):</span>
+              <span class="slider-val" id="valPanY">0px</span>
+            </div>
+            <input type="range" id="sliderPanY" min="-400" max="400" step="10" value="0">
+          </div>
+        </div>
+
+        <div class="field-row">
+          <div class="slider-control">
+            <div class="slider-header">
+              <span>Escurecimento (Véu):</span>
+              <span class="slider-val" id="valVeu">65%</span>
+            </div>
+            <input type="range" id="sliderVeu" min="0" max="1" step="0.05" value="0.65">
+          </div>
+          <div class="slider-control">
+            <div class="slider-header">
+              <span>Desfoque de Fundo:</span>
+              <span class="slider-val" id="valBlur">0px</span>
+            </div>
+            <input type="range" id="sliderBlur" min="0" max="20" step="1" value="0">
+          </div>
+        </div>
+
+        <!-- MINIATURAS DE FOTOS DG PARA TESTE RÁPIDO -->
+        <label style="margin-top:4px;">Fotos de Exemplo DG: <small>clique para testar</small></label>
+        <div class="gallery-samples">
+          <img class="sample-thumb active" src="assets/fotos/d09.jpg" data-sample="d09" alt="d09">
+          <img class="sample-thumb" src="assets/fotos/d16.jpg" data-sample="d16" alt="d16">
+          <img class="sample-thumb" src="assets/fotos/d20.jpg" data-sample="d20" alt="d20">
+          <img class="sample-thumb" src="assets/fotos/e02.jpg" data-sample="e02" alt="e02">
+          <img class="sample-thumb" src="assets/fotos/m07.jpg" data-sample="m07" alt="m07">
+          <img class="sample-thumb" src="assets/fotos/m11.jpg" data-sample="m11" alt="m11">
+        </div>
+      </div>
+
+      <!-- ÍCONE DA INSÍGNIA SUPERIOR (NO MODO BALÃO) -->
+      <div class="field-group" id="sectionIcone">
+        <h2 class="section-title">4. Ícone da Insígnia Circular</h2>
+        <div class="icons-grid" id="iconsGrid"></div>
+      </div>
+
+      <!-- TEXTOS DO SERVIÇO -->
+      <div class="field-group">
+        <h2 class="section-title">5. Conteúdo do Serviço</h2>
+
+        <div class="field-row">
+          <div>
+            <label>Título do Serviço</label>
+            <input type="text" id="inpTitle" value="POLIMENTO" placeholder="Ex: POLIMENTO">
+          </div>
+          <div>
+            <label>Subtítulo / Categoria</label>
+            <input type="text" id="inpSubtitle" value="TÉCNICO" placeholder="Ex: TÉCNICO">
+          </div>
+        </div>
+
+        <div>
+          <label>Descrição / Benefícios</label>
+          <textarea id="inpDesc" rows="3" placeholder="Ex: Realce o brilho da pintura e reduza marcas superficiais.">Realce o brilho da pintura e reduza marcas superficiais.</textarea>
+        </div>
+
+        <div class="field-row">
+          <div>
+            <label>Preço <small>opcional</small></label>
+            <input type="text" id="inpPrice" placeholder="Ex: A partir de R$ 190,00">
+          </div>
+          <div>
+            <label>Preço Antigo <small>riscado</small></label>
+            <input type="text" id="inpOldPrice" placeholder="Ex: R$ 250,00">
+          </div>
+        </div>
+
+        <div>
+          <label>Chamada do Botão CTA</label>
+          <input type="text" id="inpCta" value="AGENDE SEU SERVIÇO >>" placeholder="Ex: AGENDE SEU SERVIÇO >>">
+        </div>
+      </div>
+
+      <!-- OPÇÕES DE MARCA & CONFIGURAÇÃO -->
+      <div class="field-group">
+        <h2 class="section-title">6. Configurações</h2>
+
+        <div class="field-row">
+          <div>
+            <label>Cor de Destaque</label>
+            <select id="selColor">
+              <option value="#FF6A00" selected>Laranja Oficial DG (#FF6A00)</option>
+              <option value="#FF8A2A">Laranja Claro Neon (#FF8A2A)</option>
+              <option value="#FF3800">Vermelho Fogo (#FF3800)</option>
+              <option value="#FFAA00">Amarelo Dourado (#FFAA00)</option>
+              <option value="#FFFFFF">Branco Cromo (#FFFFFF)</option>
+            </select>
+          </div>
+          <div>
+            <label>Resolução de Exportação</label>
+            <select id="selResolution">
+              <option value="1" selected>1x Normal (1080 px)</option>
+              <option value="1.5">1.5x Alta (1620 px)</option>
+              <option value="2">2x Retina / 4K (2160 px)</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="groupLogo" style="margin-top:6px;">
+          <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+            <input type="checkbox" id="chkShowLogo" checked>
+            <span>Exibir o Logotipo Oficial DG no topo</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- BOTÕES DE AÇÃO -->
+      <div class="action-buttons">
+        <button type="button" class="btn btn-primary" id="btnDownload">
+          <span>📥</span> Baixar Imagem (PNG)
+        </button>
+        <button type="button" class="btn btn-secondary" id="btnCopy">
+          <span>📋</span> Copiar Imagem
+        </button>
+        <button type="button" class="btn btn-whatsapp" id="btnWhatsApp">
+          <span>💬</span> Compartilhar no WhatsApp
+        </button>
+      </div>
+
+      <!-- GERAÇÃO EM LOTE -->
+      <details class="batch-box">
+        <summary>⚡ Gerar vários serviços em lote</summary>
+        <p>Digite uma linha por serviço no padrão: <code>Título ; Subtítulo ; Descrição ; Preço ; CTA</code></p>
+        <textarea id="batchInput" rows="4" placeholder="POLIMENTO ; TÉCNICO ; Realce o brilho da pintura ; A partir de R$ 190 ; AGENDE JÁ >>&#10;VITRIFICAÇÃO ; DE PINTURA ; Proteção cerâmica de alta performance ; ; SOLICITAR ORÇAMENTO"></textarea>
+        <button type="button" class="btn btn-secondary" id="btnBatchGo" style="width:100%; margin-top:8px;">Baixar Todos os Cards</button>
+      </details>
+
+    </aside>
+
+    <!-- ------------------------------------------------------------------
+         PAINEL DIREITO: STAGE / PRÉVIA AO VIVO
+         ------------------------------------------------------------------ -->
+    <main class="stage">
+      
+      <div class="stage-toolbar">
+        <div class="stage-title">
+          <strong>Prévia ao Vivo</strong>
+          <small>Arraste, amplie e confira o enquadramento</small>
+        </div>
+
+        <div class="bg-switcher">
+          <button type="button" class="active" data-bg="photo">Foto</button>
+          <button type="button" data-bg="dark">Escuro</button>
+          <button type="button" data-bg="light">Claro</button>
+          <button type="button" data-bg="transparent">Transparente</button>
+        </div>
+      </div>
+
+      <!-- VIEWPORT DO CANVAS -->
+      <div class="canvas-viewport" id="canvasViewport" data-mode="story">
+        <canvas id="mainCanvas"></canvas>
+        <div class="sel-box" id="selBox" hidden>
+          <span class="sel-label" id="selLabel"></span>
+          <i class="sel-handle" id="selHandle" title="Arraste para redimensionar"></i>
+        </div>
+      </div>
+
+      <p class="canvas-meta" id="canvasMeta">Carregando...</p>
+
+      <!-- AJUSTE DE ELEMENTOS (legendas, caixas, logo) -->
+      <div class="layer-bar" id="layerBar">
+        <div class="layer-head">
+          <strong>✋ Ajuste de elementos</strong>
+          <small>Clique num texto ou caixa da prévia e arraste para mover. Puxe a bolinha do canto, use a roda do mouse ou o controle abaixo para aumentar/diminuir. Duplo clique devolve ao lugar.</small>
+        </div>
+        <div class="layer-chips" id="layerChips"></div>
+        <div class="layer-controls">
+          <span class="layer-name" id="layerName">Nenhum elemento selecionado</span>
+          <div class="layer-size">
+            <span>Tamanho</span>
+            <input type="range" id="layerScale" min="0.25" max="3" step="0.01" value="1" disabled>
+            <span class="slider-val" id="layerScaleVal">—</span>
+          </div>
+          <div class="nudge-pad" aria-label="Posição">
+            <button type="button" class="nudge-btn" data-nx="0" data-ny="-1" disabled title="Subir">▲</button>
+            <button type="button" class="nudge-btn" data-nx="-1" data-ny="0" disabled title="Esquerda">◀</button>
+            <button type="button" class="nudge-btn" data-nx="1" data-ny="0" disabled title="Direita">▶</button>
+            <button type="button" class="nudge-btn" data-nx="0" data-ny="1" disabled title="Descer">▼</button>
+          </div>
+          <div class="layer-actions">
+            <button type="button" class="btn btn-secondary" id="btnLayerReset" disabled>Resetar elemento</button>
+            <button type="button" class="btn btn-secondary" id="btnLayerResetAll">Resetar tudo</button>
+          </div>
+        </div>
+      </div>
+    </main>
+
+  </div>
+
+  <!-- ======================================================================
+       MODAL WHATSAPP
+       ====================================================================== -->
+  <div class="modal-overlay" id="modalWhatsApp">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Imagem Pronta para Compartilhar</h3>
+        <button type="button" class="modal-close" id="modalClose">✕</button>
+      </div>
+      <img class="modal-preview-img" id="modalPreviewImg" src="" alt="Prévia">
+      <button type="button" class="btn btn-whatsapp" id="modalShare">
+        <span>💬</span> Compartilhar Agora
+      </button>
+      <p class="modal-hint">No celular, toque e segure a imagem e escolha <b>Salvar Imagem</b> para enviar direto no WhatsApp.</p>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="assets/render.js"></script>
+  <script src="assets/app.js"></script>
+</body>
+</html>
