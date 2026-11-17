@@ -121,15 +121,10 @@ body {
    ========================================================================== */
 .app-container {
   display: grid;
-  grid-template-columns: 460px 1fr;
+  /* Duas colunas do tablet ao desktop: o painel encolhe, a prévia fica sempre à vista */
+  grid-template-columns: clamp(330px, 40vw, 460px) minmax(0, 1fr);
   flex: 1;
   min-height: calc(100vh - 85px);
-}
-
-@media (max-width: 1080px) {
-  .app-container {
-    grid-template-columns: 1fr;
-  }
 }
 
 /* ==========================================================================
@@ -636,10 +631,13 @@ details.batch-box p {
 
 /* Moldura do Canvas com fundo de estúdio */
 .canvas-viewport {
-  width: 100%;
-  max-width: 520px;
+  /* --arn = largura/altura do formato; a caixa encolhe junto quando a altura limita */
+  --arn: 0.5625;
+  --vmax: 80vh;
+  width: min(100%, 520px, calc(var(--vmax) * var(--arn)));
   aspect-ratio: 9 / 16;
-  max-height: 80vh;
+  max-height: var(--vmax);
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -652,10 +650,12 @@ details.batch-box p {
 }
 
 .canvas-viewport[data-mode="feed"] {
+  --arn: 0.8;
   aspect-ratio: 4 / 5;
 }
 
 .canvas-viewport[data-mode="card"] {
+  --arn: 0.8776;
   aspect-ratio: 86 / 98;
   background-image: 
     linear-gradient(45deg, #18181C 25%, transparent 25%), 
@@ -671,7 +671,11 @@ canvas#mainCanvas {
   height: 100%;
   object-fit: contain;
   display: block;
-  touch-action: none;
+  /* O dedo rola a página; o app.js bloqueia a rolagem só quando o toque cai num elemento */
+  touch-action: pan-y;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
 }
 
 /* ==========================================================================
@@ -869,6 +873,251 @@ canvas#mainCanvas {
   font-size: 12px;
 }
 
+/* ==========================================================================
+   DICAS POR TIPO DE ENTRADA (mouse x toque)
+   ========================================================================== */
+.hint-touch { display: none !important; }
+
+@media (hover: none) and (pointer: coarse) {
+  .hint-mouse { display: none !important; }
+  .hint-touch { display: block !important; }
+
+  /* Sem hover no toque: troca o "levantar" por um retorno de pressão */
+  .btn-primary:hover, .sample-thumb:hover { transform: none; }
+  .btn:active, .option-card:active, .preset-chip:active, .icon-btn:active,
+  .layer-chip:active, .nudge-btn:active, .sample-thumb:active { transform: scale(0.97); }
+  button, a, .dropzone, .sample-thumb { -webkit-tap-highlight-color: transparent; }
+}
+
+/* Barra de navegação e miniatura só existem no layout de celular */
+.mnav, .mini-preview { display: none; }
+
+/* ==========================================================================
+   RESPONSIVO — TABLET (duas colunas compactas)
+   ========================================================================== */
+@media (max-width: 960px) {
+  .header-badges { display: none; }
+  .panel { padding: 20px 18px; }
+  .stage { padding: 18px 16px; }
+  .icons-grid { grid-template-columns: repeat(3, 1fr); }
+}
+
+/* Celular deitado / telas baixas: topo enxuto para sobrar altura à prévia */
+@media (min-width: 761px) and (max-height: 560px) {
+  .header { padding: 8px 18px; }
+  .brand-logo { height: 34px; }
+  .brand-text p { display: none; }
+  .app-container { min-height: calc(100vh - 52px); }
+  .panel { max-height: calc(100vh - 52px); }
+  .stage { max-height: calc(100vh - 52px); padding: 10px 16px; gap: 10px; }
+  .stage-title small { display: none; }
+  .canvas-viewport { --vmax: calc(100vh - 120px); }
+}
+
+/* ==========================================================================
+   RESPONSIVO — CELULAR (coluna única + barra de seções embaixo)
+   ========================================================================== */
+@media (max-width: 760px) {
+  :root { --mnav-h: 64px; }
+
+  html, body { overflow-x: hidden; }
+  body { padding-bottom: calc(var(--mnav-h) + env(safe-area-inset-bottom)); }
+
+  .header {
+    padding: 10px 14px;
+    padding-top: calc(10px + env(safe-area-inset-top));
+    gap: 10px;
+  }
+  .brand { gap: 10px; min-width: 0; }
+  .brand-logo { height: 38px; }
+  .brand-text h1 { font-size: 15px; }
+  .brand-text p { font-size: 11px; line-height: 1.3; }
+
+  /* Prévia primeiro, controles embaixo; a página inteira rola (sem rolagem interna) */
+  .app-container { grid-template-columns: minmax(0, 1fr); min-height: 0; }
+  .stage {
+    order: -1;
+    gap: 10px;
+    padding: 12px 12px 20px;
+    overflow-y: visible;
+  }
+  .panel {
+    max-height: none;
+    overflow-y: visible;
+    border-right: none;
+    border-top: 1px solid var(--borda);
+    padding: 20px 14px 28px;
+    gap: 26px;
+  }
+
+  /* Ao tocar numa aba, a seção para logo abaixo do topo */
+  .nav-anchor { scroll-margin-top: 12px; }
+
+  .stage-toolbar { flex-direction: column; align-items: stretch; gap: 8px; max-width: 100%; }
+  .stage-title { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+  .stage-title small { margin: 0; text-align: right; }
+  .bg-switcher { width: 100%; }
+  .bg-switcher button { flex: 1; min-height: 40px; padding: 8px 4px; font-size: 12px; }
+
+  /* A prévia inteira cabe entre o topo e a barra de seções */
+  .canvas-viewport { --vmax: 66vh; border-radius: 14px; }
+  @supports (height: 1svh) {
+    .canvas-viewport { --vmax: 66svh; }
+  }
+  .canvas-meta { font-size: 11px; line-height: 1.4; }
+
+  .layer-bar { max-width: 100%; padding: 14px 12px; }
+  .layer-chips {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    margin: 0 -12px;
+    padding: 0 12px 4px;
+    scrollbar-width: none;
+    scroll-snap-type: x proximity;
+  }
+  .layer-chips::-webkit-scrollbar { display: none; }
+  .layer-chip { flex: 0 0 auto; min-height: 40px; padding: 9px 14px; font-size: 12px; scroll-snap-align: start; }
+  .layer-size { flex: 1 1 100%; }
+  .layer-size input[type="range"] { height: 28px; }
+  .nudge-pad { grid-template-columns: repeat(4, minmax(46px, 1fr)); gap: 6px; flex: 1 1 auto; }
+  .nudge-btn { height: 46px; font-size: 14px; }
+  .layer-actions { width: 100%; }
+  .layer-actions .btn { flex: 1; min-height: 44px; }
+  .sel-handle { width: 32px; height: 32px; right: -16px; bottom: -16px; }
+  .sel-label { font-size: 11px; }
+
+  /* Presets em carrossel de toque, encostando nas bordas */
+  .presets-list {
+    margin: 0 -14px;
+    padding: 0 14px 6px;
+    scroll-snap-type: x proximity;
+    scrollbar-width: none;
+  }
+  .presets-list::-webkit-scrollbar { display: none; }
+  .preset-chip { min-height: 40px; padding: 9px 14px; scroll-snap-align: start; }
+
+  /* 16px evita o zoom automático do iPhone ao tocar num campo */
+  input[type="text"], input[type="number"], select, textarea { font-size: 16px; padding: 12px 14px; }
+  input[type="range"] { height: 28px; }
+  .field-row { grid-template-columns: 1fr; gap: 12px; }
+  .slider-header { font-size: 12px; }
+  .icons-grid { grid-template-columns: repeat(3, 1fr); }
+  .icon-btn { min-height: 56px; padding: 10px 4px; }
+  .option-card { padding: 12px; min-height: 76px; }
+  .dropzone { padding: 20px 16px; }
+  .dropzone p { font-size: 13px; }
+  .gallery-samples { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .sample-thumb { height: 72px; }
+  .btn { min-height: 48px; }
+  .btn-remove-photo { min-width: 44px; min-height: 44px; }
+  .video-buttons .btn { flex: 1 1 100%; }
+  .video-audio input, #chkShowLogo { width: 20px; height: 20px; accent-color: var(--laranja); }
+  details.batch-box summary { min-height: 44px; display: flex; align-items: center; font-size: 13px; }
+
+  #toastNotification {
+    left: 12px !important;
+    right: 12px !important;
+    bottom: calc(var(--mnav-h) + 12px + env(safe-area-inset-bottom)) !important;
+    text-align: center;
+  }
+  body.kbd-open #toastNotification { bottom: 12px !important; }
+
+  /* ---------- Barra de seções (alcance do polegar) ---------- */
+  .mnav {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 900;
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    height: calc(var(--mnav-h) + env(safe-area-inset-bottom));
+    padding: 0 6px env(safe-area-inset-bottom);
+    background: rgba(17, 17, 21, 0.96);
+    border-top: 1px solid var(--borda);
+    box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.45);
+    transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  body.kbd-open .mnav { transform: translateY(110%); }
+
+  .mnav a {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    color: var(--texto-suave);
+    text-decoration: none;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    position: relative;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .mnav svg {
+    width: 22px;
+    height: 22px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .mnav a.active { color: var(--texto); }
+  .mnav a.active::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 30%;
+    right: 30%;
+    height: 3px;
+    border-radius: 0 0 3px 3px;
+    background: var(--laranja);
+  }
+  .mnav a.active svg { stroke: var(--laranja); }
+  .mnav a.mnav-accent { color: var(--laranja); }
+  .mnav a.mnav-accent.active { color: var(--laranja-hover); }
+
+  /* ---------- Miniatura ao vivo da prévia ---------- */
+  .mini-preview {
+    position: fixed;
+    top: calc(10px + env(safe-area-inset-top));
+    right: 10px;
+    z-index: 890;
+    display: block;
+    width: 76px;
+    padding: 0;
+    border: 1px solid rgba(255, 106, 0, 0.55);
+    border-radius: 10px;
+    overflow: hidden;
+    background: #0B0B0C;
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.6);
+    cursor: pointer;
+    opacity: 0;
+    transform: translateY(-8px) scale(0.96);
+    pointer-events: none;
+    transition: opacity 0.22s ease, transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+    -webkit-tap-highlight-color: transparent;
+  }
+  .mini-preview.show {
+    opacity: 1;
+    transform: none;
+    pointer-events: auto;
+  }
+  .mini-preview canvas { display: block; width: 100%; height: auto; }
+}
+
+@media (max-width: 360px) {
+  .brand-text p { display: none; }
+  .options-grid { grid-template-columns: 1fr; }
+  .option-card { min-height: 0; }
+  .mnav a { font-size: 10px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mnav, .mini-preview, .modal-overlay, .modal-card { transition: none !important; }
+}
+
 .canvas-meta {
   font-size: 12px;
   color: var(--texto-suave);
@@ -948,6 +1197,47 @@ canvas#mainCanvas {
   text-align: center;
 }
 
+.modal-close {
+  min-width: 40px;
+  min-height: 40px;
+  border-radius: 10px;
+}
+
+/* No celular o modal vira uma folha que sobe de baixo, ao alcance do polegar */
+@media (max-width: 760px) {
+  .modal-overlay {
+    align-items: flex-end;
+    padding: 0;
+    height: 100%;
+    width: 100%;
+    backdrop-filter: none;
+  }
+  .modal-card {
+    max-width: none;
+    border-radius: 20px 20px 0 0;
+    border-bottom: none;
+    max-height: 92vh;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 10px 16px calc(18px + env(safe-area-inset-bottom));
+    gap: 14px;
+    transform: translateY(40px);
+    transition: transform 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .modal-card::before {
+    content: '';
+    align-self: center;
+    width: 40px;
+    height: 4px;
+    border-radius: 2px;
+    background: rgba(255, 255, 255, 0.18);
+  }
+  .modal-overlay.open .modal-card { transform: none; }
+  .modal-header h3 { font-size: 15px; }
+  .modal-preview-img { max-height: 54vh; }
+  .modal-hint { font-size: 13px; line-height: 1.45; }
+}
+
 </style>
 </head>
 <body>
@@ -986,7 +1276,7 @@ canvas#mainCanvas {
       </div>
 
       <!-- FORMATO / ENQUADRAMENTO -->
-      <div class="field-group">
+      <div class="field-group nav-anchor" id="secFormato">
         <h2 class="section-title">1. Formato & Enquadramento</h2>
         <div class="options-grid">
           <button type="button" class="option-card format-card active" data-mode="story">
@@ -1025,7 +1315,7 @@ canvas#mainCanvas {
       </div>
 
       <!-- FOTO DE FUNDO & ENQUADRAMENTO -->
-      <div class="field-group" id="sectionFoto">
+      <div class="field-group nav-anchor" id="sectionFoto">
         <h2 class="section-title">3. Foto do Carro & Enquadramento</h2>
         
         <!-- DROPZONE / UPLOAD -->
@@ -1120,7 +1410,7 @@ canvas#mainCanvas {
       </div>
 
       <!-- TEXTOS DO SERVIÇO -->
-      <div class="field-group">
+      <div class="field-group nav-anchor" id="secConteudo">
         <h2 class="section-title">5. Conteúdo do Serviço</h2>
 
         <div class="field-row">
@@ -1157,7 +1447,7 @@ canvas#mainCanvas {
       </div>
 
       <!-- OPÇÕES DE MARCA & CONFIGURAÇÃO -->
-      <div class="field-group">
+      <div class="field-group nav-anchor" id="secExportar">
         <h2 class="section-title">6. Configurações</h2>
 
         <div class="field-row">
@@ -1215,12 +1505,13 @@ canvas#mainCanvas {
     <!-- ------------------------------------------------------------------
          PAINEL DIREITO: STAGE / PRÉVIA AO VIVO
          ------------------------------------------------------------------ -->
-    <main class="stage">
-      
+    <main class="stage nav-anchor" id="secPrevia">
+
       <div class="stage-toolbar">
         <div class="stage-title">
           <strong>Prévia ao Vivo</strong>
-          <small>Arraste, amplie e confira o enquadramento</small>
+          <small class="hint-mouse">Arraste, amplie e confira o enquadramento</small>
+          <small class="hint-touch">Toque num texto ou caixa para mover</small>
         </div>
 
         <div class="bg-switcher">
@@ -1246,7 +1537,8 @@ canvas#mainCanvas {
       <div class="layer-bar" id="layerBar">
         <div class="layer-head">
           <strong>✋ Ajuste de elementos</strong>
-          <small>Clique num texto ou caixa da prévia e arraste para mover. Puxe a bolinha do canto, use a roda do mouse ou o controle abaixo para aumentar/diminuir. Duplo clique devolve ao lugar.</small>
+          <small class="hint-mouse">Clique num texto ou caixa da prévia e arraste para mover. Puxe a bolinha do canto, use a roda do mouse ou o controle abaixo para aumentar/diminuir. Duplo clique devolve ao lugar.</small>
+          <small class="hint-touch">Toque num texto ou caixa e arraste para mover. Para aumentar ou diminuir, faça pinça com dois dedos, puxe a bolinha do canto ou use o controle abaixo. Fora dos elementos, o dedo rola a página.</small>
         </div>
         <div class="layer-chips" id="layerChips"></div>
         <div class="layer-controls">
@@ -1273,13 +1565,43 @@ canvas#mainCanvas {
   </div>
 
   <!-- ======================================================================
+       NAVEGAÇÃO MOBILE (barra inferior) + MINIATURA AO VIVO DA PRÉVIA
+       ====================================================================== -->
+  <nav class="mnav" id="mobileNav" aria-label="Seções do gerador">
+    <a href="#secPrevia" data-target="secPrevia" class="active">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="2.5" width="12" height="19" rx="2.5"/><path d="M10 18.5h4"/></svg>
+      <span>Prévia</span>
+    </a>
+    <a href="#secFormato" data-target="secFormato">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.5"/></svg>
+      <span>Formato</span>
+    </a>
+    <a href="#sectionFoto" data-target="sectionFoto">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2.5"/><circle cx="8.5" cy="10" r="1.6"/><path d="M21 16l-5-5-8 8"/></svg>
+      <span>Foto</span>
+    </a>
+    <a href="#secConteudo" data-target="secConteudo">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 6V4.5h14V6M12 4.5v15M9 19.5h6"/></svg>
+      <span>Texto</span>
+    </a>
+    <a href="#secExportar" data-target="secExportar" class="mnav-accent">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5v11M7.5 10l4.5 4.5 4.5-4.5M4.5 16.5v3h15v-3"/></svg>
+      <span>Exportar</span>
+    </a>
+  </nav>
+
+  <button type="button" class="mini-preview" id="miniPreview" aria-label="Voltar para a prévia">
+    <canvas id="miniCanvas"></canvas>
+  </button>
+
+  <!-- ======================================================================
        MODAL WHATSAPP
        ====================================================================== -->
-  <div class="modal-overlay" id="modalWhatsApp">
+  <div class="modal-overlay" id="modalWhatsApp" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
     <div class="modal-card">
       <div class="modal-header">
-        <h3>Imagem Pronta para Compartilhar</h3>
-        <button type="button" class="modal-close" id="modalClose">✕</button>
+        <h3 id="modalTitle">Imagem Pronta para Compartilhar</h3>
+        <button type="button" class="modal-close" id="modalClose" aria-label="Fechar">✕</button>
       </div>
       <img class="modal-preview-img" id="modalPreviewImg" src="" alt="Prévia">
       <button type="button" class="btn btn-whatsapp" id="modalShare">
@@ -3075,6 +3397,7 @@ canvas#mainCanvas {
     setupBgSwitcher();
     setupLayers();
     setupVideoControls();
+    setupMobileNav();
     updateControlsVisibility();
   }
 
@@ -3391,6 +3714,7 @@ canvas#mainCanvas {
   const selHandle = $('selHandle');
   const selLabel = $('selLabel');
   let drag = null;
+  let pinch = null;
   let rafId = 0;
   let chipSig = '';
 
@@ -3554,6 +3878,7 @@ canvas#mainCanvas {
   function setupLayers() {
     canvas.addEventListener('pointerdown', (e) => {
       if (e.button !== undefined && e.button > 0) return;
+      if (e.pointerType === 'touch' && (!e.isPrimary || pinch)) return; // 2º dedo = pinça
       const p = toLogical(e);
       const h = hitAt(p);
       if (!h) { select(null); return; }
@@ -3566,6 +3891,29 @@ canvas#mainCanvas {
     canvas.addEventListener('pointermove', onMove);
     canvas.addEventListener('pointerup', onUp);
     canvas.addEventListener('pointercancel', onUp);
+
+    // Toque: o canvas deixa a página rolar (touch-action: pan-y). Só quando o dedo
+    // cai em cima de um elemento a rolagem é bloqueada e o arraste assume.
+    // Dois dedos com um elemento selecionado = pinça para redimensionar.
+    const touchDist = (t) => Math.hypot(t[0].clientX - t[1].clientX, t[0].clientY - t[1].clientY);
+    canvas.addEventListener('touchstart', (e) => {
+      if (e.touches.length === 2 && state.sel) {
+        e.preventDefault();
+        drag = null;
+        pinch = { d0: Math.max(20, touchDist(e.touches)), s0: layerOf(state.sel).s };
+        return;
+      }
+      if (e.touches.length === 1 && hitAt(toLogical(e.touches[0]))) e.preventDefault();
+    }, { passive: false });
+    canvas.addEventListener('touchmove', (e) => {
+      if (!pinch || e.touches.length !== 2 || !state.sel) return;
+      e.preventDefault();
+      layerOf(state.sel).s = clamp(pinch.s0 * touchDist(e.touches) / pinch.d0, 0.25, 3);
+      queueDraw();
+    }, { passive: false });
+    const endPinch = (e) => { if (e.touches.length < 2) pinch = null; };
+    canvas.addEventListener('touchend', endPinch);
+    canvas.addEventListener('touchcancel', endPinch);
 
     // Alça do canto: redimensiona em torno do ponto de ancoragem do elemento
     selHandle.addEventListener('pointerdown', (e) => {
@@ -3663,6 +4011,7 @@ canvas#mainCanvas {
     render(canvas, Object.assign({}, state, { layerPass: 'bg', bgImage: state.bgVideo }));
     canvas.getContext('2d').drawImage(fgCanvas, 0, 0);
     canvas._dg = fgCanvas._dg; // áreas clicáveis dos elementos
+    mirrorMini();
   }
 
   function videoTick() {
@@ -3876,6 +4225,7 @@ canvas#mainCanvas {
     } else {
       stopVideoLoop();
       render(canvas, opts);
+      mirrorMini();
     }
     refreshLayerUI();
 
@@ -3936,9 +4286,15 @@ canvas#mainCanvas {
       modal.classList.add('open');
     };
 
-    $('modalClose').onclick = () => {
-      $('modalWhatsApp').classList.remove('open');
-    };
+    const closeModal = () => $('modalWhatsApp').classList.remove('open');
+    $('modalClose').onclick = closeModal;
+    // Toque fora da folha ou Esc também fecham
+    $('modalWhatsApp').addEventListener('click', (e) => {
+      if (e.target === e.currentTarget) closeModal();
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && $('modalWhatsApp').classList.contains('open')) closeModal();
+    });
 
     $('modalShare').onclick = async () => {
       canvas.toBlob(async (blob) => {
@@ -3996,6 +4352,91 @@ canvas#mainCanvas {
       }
       next();
     };
+  }
+
+  // ==========================================================================
+  // CELULAR: barra de seções, miniatura ao vivo da prévia e teclado aberto
+  // ==========================================================================
+  const phoneMQ = window.matchMedia('(max-width: 760px)');
+  const reduceMQ = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const mini = $('miniPreview');
+  const miniCanvas = $('miniCanvas');
+  let stageVisible = true;
+  let miniRaf = 0;
+
+  // Copia o quadro atual do canvas principal para a miniatura (no máximo 1x por quadro)
+  function mirrorMini() {
+    if (!miniCanvas || !mini.classList.contains('show') || miniRaf) return;
+    miniRaf = requestAnimationFrame(() => {
+      miniRaf = 0;
+      if (!canvas.width || !canvas.height) return;
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const w = Math.round(76 * dpr);
+      const h = Math.round(w * canvas.height / canvas.width);
+      if (miniCanvas.width !== w) miniCanvas.width = w;
+      if (miniCanvas.height !== h) miniCanvas.height = h;
+      const ctx = miniCanvas.getContext('2d');
+      ctx.fillStyle = '#0B0B0C';
+      ctx.fillRect(0, 0, w, h);
+      ctx.drawImage(canvas, 0, 0, w, h);
+    });
+  }
+
+  function updateMini() {
+    const show = phoneMQ.matches && !stageVisible;
+    mini.classList.toggle('show', show);
+    if (show) mirrorMini();
+  }
+
+  function scrollToSection(id) {
+    const el = $(id);
+    if (!el) return;
+    el.scrollIntoView({ behavior: reduceMQ.matches ? 'auto' : 'smooth', block: 'start' });
+  }
+
+  function setupMobileNav() {
+    const links = Array.from(document.querySelectorAll('#mobileNav a'));
+    const setActive = (id) => links.forEach((a) => a.classList.toggle('active', a.dataset.target === id));
+
+    links.forEach((a) => {
+      a.addEventListener('click', (e) => {
+        e.preventDefault();
+        setActive(a.dataset.target);
+        scrollToSection(a.dataset.target);
+      });
+    });
+    mini.addEventListener('click', () => { setActive('secPrevia'); scrollToSection('secPrevia'); });
+
+    if (!('IntersectionObserver' in window)) return;
+
+    // Aba ativa = seção que cruza a faixa central da tela
+    const visible = new Map();
+    const secObs = new IntersectionObserver((entries) => {
+      entries.forEach((en) => {
+        if (en.isIntersecting) visible.set(en.target.id, en.boundingClientRect.top);
+        else visible.delete(en.target.id);
+      });
+      let best = null;
+      visible.forEach((top, id) => { if (best === null || top > visible.get(best)) best = id; });
+      if (best) setActive(best);
+    }, { rootMargin: '-35% 0px -55% 0px' });
+    links.forEach((a) => { const el = $(a.dataset.target); if (el) secObs.observe(el); });
+
+    // Miniatura aparece quando a prévia sai da tela
+    new IntersectionObserver((entries) => {
+      stageVisible = entries[0].isIntersecting;
+      updateMini();
+    }, { threshold: 0.12 }).observe(viewport);
+
+    const onMQ = () => updateMini();
+    if (phoneMQ.addEventListener) phoneMQ.addEventListener('change', onMQ);
+    else if (phoneMQ.addListener) phoneMQ.addListener(onMQ);
+
+    // Teclado virtual aberto: a barra de seções sai do caminho
+    const isField = (t) => t && (/^(TEXTAREA|SELECT)$/.test(t.tagName) ||
+      (t.tagName === 'INPUT' && /^(text|number|search|email|tel|url)$/.test(t.type)));
+    document.addEventListener('focusin', (e) => { if (isField(e.target)) document.body.classList.add('kbd-open'); });
+    document.addEventListener('focusout', (e) => { if (isField(e.target)) document.body.classList.remove('kbd-open'); });
   }
 
   // Notificações Toast

@@ -49,7 +49,7 @@
       </div>
 
       <!-- FORMATO / ENQUADRAMENTO -->
-      <div class="field-group">
+      <div class="field-group nav-anchor" id="secFormato">
         <h2 class="section-title">1. Formato & Enquadramento</h2>
         <div class="options-grid">
           <button type="button" class="option-card format-card active" data-mode="story">
@@ -88,7 +88,7 @@
       </div>
 
       <!-- FOTO DE FUNDO & ENQUADRAMENTO -->
-      <div class="field-group" id="sectionFoto">
+      <div class="field-group nav-anchor" id="sectionFoto">
         <h2 class="section-title">3. Foto do Carro & Enquadramento</h2>
         
         <!-- DROPZONE / UPLOAD -->
@@ -183,7 +183,7 @@
       </div>
 
       <!-- TEXTOS DO SERVIÇO -->
-      <div class="field-group">
+      <div class="field-group nav-anchor" id="secConteudo">
         <h2 class="section-title">5. Conteúdo do Serviço</h2>
 
         <div class="field-row">
@@ -220,7 +220,7 @@
       </div>
 
       <!-- OPÇÕES DE MARCA & CONFIGURAÇÃO -->
-      <div class="field-group">
+      <div class="field-group nav-anchor" id="secExportar">
         <h2 class="section-title">6. Configurações</h2>
 
         <div class="field-row">
@@ -278,12 +278,13 @@
     <!-- ------------------------------------------------------------------
          PAINEL DIREITO: STAGE / PRÉVIA AO VIVO
          ------------------------------------------------------------------ -->
-    <main class="stage">
-      
+    <main class="stage nav-anchor" id="secPrevia">
+
       <div class="stage-toolbar">
         <div class="stage-title">
           <strong>Prévia ao Vivo</strong>
-          <small>Arraste, amplie e confira o enquadramento</small>
+          <small class="hint-mouse">Arraste, amplie e confira o enquadramento</small>
+          <small class="hint-touch">Toque num texto ou caixa para mover</small>
         </div>
 
         <div class="bg-switcher">
@@ -309,7 +310,8 @@
       <div class="layer-bar" id="layerBar">
         <div class="layer-head">
           <strong>✋ Ajuste de elementos</strong>
-          <small>Clique num texto ou caixa da prévia e arraste para mover. Puxe a bolinha do canto, use a roda do mouse ou o controle abaixo para aumentar/diminuir. Duplo clique devolve ao lugar.</small>
+          <small class="hint-mouse">Clique num texto ou caixa da prévia e arraste para mover. Puxe a bolinha do canto, use a roda do mouse ou o controle abaixo para aumentar/diminuir. Duplo clique devolve ao lugar.</small>
+          <small class="hint-touch">Toque num texto ou caixa e arraste para mover. Para aumentar ou diminuir, faça pinça com dois dedos, puxe a bolinha do canto ou use o controle abaixo. Fora dos elementos, o dedo rola a página.</small>
         </div>
         <div class="layer-chips" id="layerChips"></div>
         <div class="layer-controls">
@@ -336,13 +338,43 @@
   </div>
 
   <!-- ======================================================================
+       NAVEGAÇÃO MOBILE (barra inferior) + MINIATURA AO VIVO DA PRÉVIA
+       ====================================================================== -->
+  <nav class="mnav" id="mobileNav" aria-label="Seções do gerador">
+    <a href="#secPrevia" data-target="secPrevia" class="active">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="2.5" width="12" height="19" rx="2.5"/><path d="M10 18.5h4"/></svg>
+      <span>Prévia</span>
+    </a>
+    <a href="#secFormato" data-target="secFormato">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.5"/></svg>
+      <span>Formato</span>
+    </a>
+    <a href="#sectionFoto" data-target="sectionFoto">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2.5"/><circle cx="8.5" cy="10" r="1.6"/><path d="M21 16l-5-5-8 8"/></svg>
+      <span>Foto</span>
+    </a>
+    <a href="#secConteudo" data-target="secConteudo">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 6V4.5h14V6M12 4.5v15M9 19.5h6"/></svg>
+      <span>Texto</span>
+    </a>
+    <a href="#secExportar" data-target="secExportar" class="mnav-accent">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5v11M7.5 10l4.5 4.5 4.5-4.5M4.5 16.5v3h15v-3"/></svg>
+      <span>Exportar</span>
+    </a>
+  </nav>
+
+  <button type="button" class="mini-preview" id="miniPreview" aria-label="Voltar para a prévia">
+    <canvas id="miniCanvas"></canvas>
+  </button>
+
+  <!-- ======================================================================
        MODAL WHATSAPP
        ====================================================================== -->
-  <div class="modal-overlay" id="modalWhatsApp">
+  <div class="modal-overlay" id="modalWhatsApp" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
     <div class="modal-card">
       <div class="modal-header">
-        <h3>Imagem Pronta para Compartilhar</h3>
-        <button type="button" class="modal-close" id="modalClose">✕</button>
+        <h3 id="modalTitle">Imagem Pronta para Compartilhar</h3>
+        <button type="button" class="modal-close" id="modalClose" aria-label="Fechar">✕</button>
       </div>
       <img class="modal-preview-img" id="modalPreviewImg" src="" alt="Prévia">
       <button type="button" class="btn btn-whatsapp" id="modalShare">

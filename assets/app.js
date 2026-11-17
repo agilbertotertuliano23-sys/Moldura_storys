@@ -93,6 +93,7 @@
     setupBgSwitcher();
     setupLayers();
     setupVideoControls();
+    setupMobileNav();
     updateControlsVisibility();
   }
 
@@ -409,6 +410,7 @@
   const selHandle = $('selHandle');
   const selLabel = $('selLabel');
   let drag = null;
+  let pinch = null;
   let rafId = 0;
   let chipSig = '';
 
@@ -572,6 +574,7 @@
   function setupLayers() {
     canvas.addEventListener('pointerdown', (e) => {
       if (e.button !== undefined && e.button > 0) return;
+      if (e.pointerType === 'touch' && (!e.isPrimary || pinch)) return; // 2º dedo = pinça
       const p = toLogical(e);
       const h = hitAt(p);
       if (!h) { select(null); return; }
@@ -584,6 +587,29 @@
     canvas.addEventListener('pointermove', onMove);
     canvas.addEventListener('pointerup', onUp);
     canvas.addEventListener('pointercancel', onUp);
+
+    // Toque: o canvas deixa a página rolar (touch-action: pan-y). Só quando o dedo
+    // cai em cima de um elemento a rolagem é bloqueada e o arraste assume.
+    // Dois dedos com um elemento selecionado = pinça para redimensionar.
+    const touchDist = (t) => Math.hypot(t[0].clientX - t[1].clientX, t[0].clientY - t[1].clientY);
+    canvas.addEventListener('touchstart', (e) => {
+      if (e.touches.length === 2 && state.sel) {
+        e.preventDefault();
+        drag = null;
+        pinch = { d0: Math.max(20, touchDist(e.touches)), s0: layerOf(state.sel).s };
+        return;
+      }
+      if (e.touches.length === 1 && hitAt(toLogical(e.touches[0]))) e.preventDefault();
+    }, { passive: false });
+    canvas.addEventListener('touchmove', (e) => {
+      if (!pinch || e.touches.length !== 2 || !state.sel) return;
+      e.preventDefault();
+      layerOf(state.sel).s = clamp(pinch.s0 * touchDist(e.touches) / pinch.d0, 0.25, 3);
+      queueDraw();
+    }, { passive: false });
+    const endPinch = (e) => { if (e.touches.length < 2) pinch = null; };
+    canvas.addEventListener('touchend', endPinch);
+    canvas.addEventListener('touchcancel', endPinch);
 
     // Alça do canto: redimensiona em torno do ponto de ancoragem do elemento
     selHandle.addEventListener('pointerdown', (e) => {
@@ -681,6 +707,7 @@
     render(canvas, Object.assign({}, state, { layerPass: 'bg', bgImage: state.bgVideo }));
     canvas.getContext('2d').drawImage(fgCanvas, 0, 0);
     canvas._dg = fgCanvas._dg; // áreas clicáveis dos elementos
+    mirrorMini();
   }
 
   function videoTick() {
@@ -894,6 +921,7 @@
     } else {
       stopVideoLoop();
       render(canvas, opts);
+      mirrorMini();
     }
     refreshLayerUI();
 
@@ -954,9 +982,15 @@
       modal.classList.add('open');
     };
 
-    $('modalClose').onclick = () => {
-      $('modalWhatsApp').classList.remove('open');
-    };
+    const closeModal = () => $('modalWhatsApp').classList.remove('open');
+    $('modalClose').onclick = closeModal;
+    // Toque fora da folha ou Esc também fecham
+    $('modalWhatsApp').addEventListener('click', (e) => {
+      if (e.target === e.currentTarget) closeModal();
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && $('modalWhatsApp').classList.contains('open')) closeModal();
+    });
 
     $('modalShare').onclick = async () => {
       canvas.toBlob(async (blob) => {
@@ -1014,6 +1048,91 @@
       }
       next();
     };
+  }
+
+  // ==========================================================================
+  // CELULAR: barra de seções, miniatura ao vivo da prévia e teclado aberto
+  // ==========================================================================
+  const phoneMQ = window.matchMedia('(max-width: 760px)');
+  const reduceMQ = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const mini = $('miniPreview');
+  const miniCanvas = $('miniCanvas');
+  let stageVisible = true;
+  let miniRaf = 0;
+
+  // Copia o quadro atual do canvas principal para a miniatura (no máximo 1x por quadro)
+  function mirrorMini() {
+    if (!miniCanvas || !mini.classList.contains('show') || miniRaf) return;
+    miniRaf = requestAnimationFrame(() => {
+      miniRaf = 0;
+      if (!canvas.width || !canvas.height) return;
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const w = Math.round(76 * dpr);
+      const h = Math.round(w * canvas.height / canvas.width);
+      if (miniCanvas.width !== w) miniCanvas.width = w;
+      if (miniCanvas.height !== h) miniCanvas.height = h;
+      const ctx = miniCanvas.getContext('2d');
+      ctx.fillStyle = '#0B0B0C';
+      ctx.fillRect(0, 0, w, h);
+      ctx.drawImage(canvas, 0, 0, w, h);
+    });
+  }
+
+  function updateMini() {
+    const show = phoneMQ.matches && !stageVisible;
+    mini.classList.toggle('show', show);
+    if (show) mirrorMini();
+  }
+
+  function scrollToSection(id) {
+    const el = $(id);
+    if (!el) return;
+    el.scrollIntoView({ behavior: reduceMQ.matches ? 'auto' : 'smooth', block: 'start' });
+  }
+
+  function setupMobileNav() {
+    const links = Array.from(document.querySelectorAll('#mobileNav a'));
+    const setActive = (id) => links.forEach((a) => a.classList.toggle('active', a.dataset.target === id));
+
+    links.forEach((a) => {
+      a.addEventListener('click', (e) => {
+        e.preventDefault();
+        setActive(a.dataset.target);
+        scrollToSection(a.dataset.target);
+      });
+    });
+    mini.addEventListener('click', () => { setActive('secPrevia'); scrollToSection('secPrevia'); });
+
+    if (!('IntersectionObserver' in window)) return;
+
+    // Aba ativa = seção que cruza a faixa central da tela
+    const visible = new Map();
+    const secObs = new IntersectionObserver((entries) => {
+      entries.forEach((en) => {
+        if (en.isIntersecting) visible.set(en.target.id, en.boundingClientRect.top);
+        else visible.delete(en.target.id);
+      });
+      let best = null;
+      visible.forEach((top, id) => { if (best === null || top > visible.get(best)) best = id; });
+      if (best) setActive(best);
+    }, { rootMargin: '-35% 0px -55% 0px' });
+    links.forEach((a) => { const el = $(a.dataset.target); if (el) secObs.observe(el); });
+
+    // Miniatura aparece quando a prévia sai da tela
+    new IntersectionObserver((entries) => {
+      stageVisible = entries[0].isIntersecting;
+      updateMini();
+    }, { threshold: 0.12 }).observe(viewport);
+
+    const onMQ = () => updateMini();
+    if (phoneMQ.addEventListener) phoneMQ.addEventListener('change', onMQ);
+    else if (phoneMQ.addListener) phoneMQ.addListener(onMQ);
+
+    // Teclado virtual aberto: a barra de seções sai do caminho
+    const isField = (t) => t && (/^(TEXTAREA|SELECT)$/.test(t.tagName) ||
+      (t.tagName === 'INPUT' && /^(text|number|search|email|tel|url)$/.test(t.type)));
+    document.addEventListener('focusin', (e) => { if (isField(e.target)) document.body.classList.add('kbd-open'); });
+    document.addEventListener('focusout', (e) => { if (isField(e.target)) document.body.classList.remove('kbd-open'); });
   }
 
   // Notificações Toast
