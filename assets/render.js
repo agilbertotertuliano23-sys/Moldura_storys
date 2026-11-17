@@ -99,6 +99,55 @@
     }
   };
 
+  // Modelo pronto com foto própria (941 x 1672): a foto escolhida não aparece
+  DG.MOLDURAS.localizacao = {
+    id: 'localizacao',
+    label: 'Localização',
+    file: 'localizacao.jpg',
+    plate: { x: 92, y: 1166, w: 732, h: 168 },
+    side: { x: 182, y: 1446, w: 400, h: 100, align: 'left' }
+  };
+
+  // Molduras premium 1080 x 1920 (assets/molduras/premium/pNN.webp).
+  // bg = a área fica sobre a foto: ganha uma placa escura translúcida para ler bem.
+  [
+    ['p01', 'Asa esquerda', { x: 100, y: 1236, w: 640, h: 220, bg: true }, { x: 190, y: 1478, w: 450, h: 128, align: 'left' }],
+    ['p02', 'Asa direita', { x: 390, y: 1350, w: 570, h: 220, bg: true }, { x: 400, y: 1608, w: 520, h: 84, align: 'center' }],
+    ['p03', 'Cantos diagonais', { x: 170, y: 1425, w: 465, h: 170 }, { x: 110, y: 1280, w: 560, h: 100, align: 'left', bg: true }],
+    ['p04', 'Canopla', { x: 140, y: 1100, w: 800, h: 220, bg: true }, { x: 220, y: 1346, w: 640, h: 80, align: 'center', bg: true }],
+    ['p05', 'Coluna S', { x: 110, y: 1392, w: 520, h: 222 }, { x: 330, y: 1240, w: 560, h: 100, align: 'left', bg: true }],
+    ['p06', 'Arco halo', { x: 140, y: 1170, w: 800, h: 220, bg: true }, { x: 140, y: 1410, w: 800, h: 90, align: 'center', bg: true }],
+    ['p07', 'Colunas turbina', { x: 150, y: 1410, w: 780, h: 220, bg: true }, { x: 190, y: 1672, w: 700, h: 86, align: 'center' }],
+    ['p08', 'Quatro cantos', { x: 140, y: 1280, w: 800, h: 220, bg: true }, { x: 306, y: 1680, w: 378, h: 80, align: 'center' }],
+    ['p09', 'Racing vermelho', { x: 470, y: 1585, w: 470, h: 142 }, { x: 430, y: 1455, w: 560, h: 96, align: 'left', bg: true }],
+    ['p10', 'Velocímetro', { x: 170, y: 1110, w: 600, h: 220, bg: true }, { x: 175, y: 1560, w: 460, h: 102, align: 'left' }],
+    ['p11', 'V invertido', { x: 150, y: 1425, w: 780, h: 175, bg: true }, { x: 360, y: 1296, w: 580, h: 100, align: 'left', bg: true }],
+    ['p12', 'Colmeia', { x: 110, y: 1070, w: 820, h: 220, bg: true }, { x: 410, y: 1610, w: 306, h: 76, align: 'center' }],
+    ['p13', 'Faixas opostas', { x: 100, y: 1240, w: 700, h: 220, bg: true }, { x: 100, y: 1480, w: 520, h: 90, align: 'left', bg: true }],
+    ['p14', 'Módulos flutuantes', { x: 110, y: 1250, w: 860, h: 220, bg: true }, { x: 330, y: 1610, w: 580, h: 100, align: 'center' }],
+    ['p15', 'Escudo inferior', { x: 140, y: 1010, w: 800, h: 220, bg: true }, { x: 190, y: 1245, w: 700, h: 88, align: 'center', bg: true }],
+    ['p16', 'Bumerangues', { x: 90, y: 1040, w: 760, h: 220, bg: true }, { x: 205, y: 1292, w: 555, h: 116, align: 'left' }],
+    ['p17', 'Hélice direita', { x: 110, y: 1220, w: 720, h: 220, bg: true }, { x: 130, y: 1640, w: 600, h: 96, align: 'left' }],
+    ['p18', 'Xadrez racing', { x: 380, y: 1240, w: 640, h: 220, bg: true }, { x: 380, y: 1480, w: 640, h: 90, align: 'right', bg: true }],
+    ['p19', 'Octógono aberto', { x: 220, y: 1290, w: 640, h: 210, bg: true }, { x: 195, y: 1582, w: 286, h: 88, align: 'center' }],
+    ['p20', 'Onda dupla', { x: 200, y: 1270, w: 760, h: 220, bg: true }, { x: 200, y: 1510, w: 560, h: 90, align: 'left', bg: true }]
+  ].forEach(([id, label, plate, side]) => {
+    DG.MOLDURAS[id] = { id: id, label: label, file: 'premium/' + id + '.webp', group: 'premium', plate: plate, side: side };
+  });
+
+  // Balões prontos em PNG (1200 x 650). inner = área do texto dentro do contorno
+  DG.BALOES = {};
+  [
+    [117, 91, 952, 384], [117, 91, 952, 384], [253, 137, 750, 348], [170, 136, 776, 350],
+    [148, 111, 860, 379], [143, 135, 866, 315], [155, 96, 882, 285], [129, 116, 938, 379],
+    [157, 81, 856, 464], [185, 185, 814, 306], [304, 101, 651, 419], [202, 116, 773, 369],
+    [136, 101, 914, 386], [96, 174, 999, 336], [86, 116, 977, 346], [152, 101, 862, 379],
+    [121, 116, 946, 344], [183, 96, 851, 414], [211, 126, 751, 379], [157, 136, 868, 332]
+  ].forEach((r, i) => {
+    const n = String(i + 1).padStart(2, '0');
+    DG.BALOES['b' + n] = { id: 'b' + n, label: 'Balão ' + n, file: 'balao_' + n + '.png', inner: { x: r[0], y: r[1], w: r[2], h: r[3] } };
+  });
+
   // Estilos dos textos extras que a pessoa adiciona em qualquer formato
   DG.TEXT_STYLES = {
     destaque: { label: 'Destaque' },
@@ -1384,7 +1433,119 @@
     const py = plate.y * scaleY;
     const pw = plate.w * scaleX;
     const ph = plate.h * scaleY;
+    const accent = opts.color || BRAND.laranja;
 
+    // Placa sobre a foto: fundo escuro translúcido com fio na cor da marca
+    function drawBackdrop(x, y, w, h) {
+      ctx.save();
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.55)';
+      ctx.shadowBlur = 18;
+      ctx.fillStyle = 'rgba(10, 10, 12, 0.72)';
+      drawRoundedRect(ctx, x, y, w, h, Math.min(22, h / 2));
+      ctx.fill();
+      ctx.shadowBlur = 0;
+      ctx.strokeStyle = accent;
+      ctx.globalAlpha = 0.55;
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      ctx.restore();
+    }
+    if (plate.bg) drawBackdrop(px, py, pw, ph);
+
+    drawPlateText(ctx, px, py, pw, ph, opts);
+
+    // ---- Linha ao lado das setas "»|": chamada + contato ----
+    const side = molduraDef.side;
+    // As setas da moldura já fazem o papel do ">>", então tiramos do texto
+    const cta = String(opts.cta || '').replace(/\s*(>>|»|>)+\s*$/g, '').trim().toUpperCase();
+    const contact = String(opts.contact || '').trim();
+    if (side && (cta || contact)) {
+      const sx = side.x * scaleX;
+      const sy = side.y * scaleY;
+      const sw = side.w * scaleX;
+      const sh = side.h * scaleY;
+      if (side.bg) drawBackdrop(sx, sy, sw, sh);
+      drawSideText(ctx, sx, sy, sw, sh, side.align, cta, contact, opts, side.bg ? 20 : 0);
+    }
+  }
+
+  // Mede uma linha e encolhe a fonte até caber na largura
+  function fitFontIn(ctx, FONT, text, weight, size, maxW, min) {
+    ctx.font = `${weight} ${size}px ${FONT}`;
+    while (size > min && ctx.measureText(text).width > maxW) {
+      size -= 1;
+      ctx.font = `${weight} ${size}px ${FONT}`;
+    }
+    return size;
+  }
+
+  // Chamada + contato numa faixa (alinhados à esquerda, direita ou centro)
+  function drawSideText(ctx, sx, sy, sw, sh, align, cta, contact, opts, inset) {
+    const accent = opts.color || BRAND.laranja;
+    const FONT = '"Poppins", "Exo 2", sans-serif';
+    const fitFont = (t, w, s, m, mn) => fitFontIn(ctx, FONT, t, w, s, m, mn);
+    inset = inset || 0;
+    const inW = sw - inset * 2;
+    const ax = align === 'right' ? sx + sw - inset : (align === 'center' ? sx + sw / 2 : sx + inset);
+    const boxX = (tw) => (align === 'right' ? ax - tw : (align === 'center' ? ax - tw / 2 : ax));
+    ctx.save();
+    ctx.textBaseline = 'middle';
+    ctx.textAlign = align === 'right' ? 'right' : (align === 'center' ? 'center' : 'left');
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
+    ctx.shadowBlur = 8;
+    const both = cta && contact;
+    const scy = sy + sh / 2;
+    const ctaY = both ? scy - sh * 0.2 : scy;
+    const conY = both ? scy + sh * 0.24 : scy;
+    const ax2 = ax;
+
+    if (cta) {
+      L(ctx, opts, 'cta', { x: ax2, y: ctaY }, () => {
+        const fs = fitFont(cta, '900 italic', Math.round(sh * (both ? 0.34 : 0.42)), inW, 12);
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillText(cta, ax2, ctaY);
+        const tw = ctx.measureText(cta).width;
+        return { x: align === 'right' ? ax2 - tw : boxX(tw), y: ctaY - fs / 2, w: tw, h: fs };
+      });
+    }
+    if (contact) {
+      L(ctx, opts, 'contact', { x: ax2, y: conY }, () => {
+        const fs = fitFont(contact, '700', Math.round(sh * (both ? 0.24 : 0.34)), inW, 10);
+        ctx.fillStyle = accent;
+        ctx.fillText(contact, ax2, conY);
+        const tw = ctx.measureText(contact).width;
+        return { x: align === 'right' ? ax2 - tw : boxX(tw), y: conY - fs / 2, w: tw, h: fs };
+      });
+    }
+    ctx.restore();
+  }
+
+  // Balão pronto em PNG (assets/baloes): texto dentro do contorno, chamada embaixo
+  function renderBalaoPng(ctx, W, H, opts) {
+    const def = DG.BALOES[opts.model];
+    const img = opts.balaoImage;
+    if (!def || !img || !img.complete || !img.naturalWidth) return;
+    const bw = opts.exportMode === 'card' ? W - 40 : 960;
+    const k = bw / img.naturalWidth;
+    const bh = img.naturalHeight * k;
+    const bx = (W - bw) / 2;
+    let by;
+    if (opts.exportMode === 'story') by = H - bh - 330;
+    else if (opts.exportMode === 'feed') by = H - bh - 170;
+    else by = (H - bh) / 2 - 50;
+
+    L(ctx, opts, 'card', { x: bx + bw / 2, y: by + bh / 2 }, () => {
+      ctx.drawImage(img, bx, by, bw, bh);
+      const r = def.inner;
+      drawPlateText(ctx, bx + r.x * k, by + r.y * k, r.w * k, r.h * k, opts);
+      const cta = String(opts.cta || '').trim().toUpperCase();
+      if (cta) drawSideText(ctx, bx + 60, by + bh + 12, bw - 120, 92, 'center', cta, '', opts, 0);
+      return { x: bx, y: by, w: bw, h: bh };
+    });
+  }
+
+  // Título, complemento e preço empilhados e centrados num retângulo
+  function drawPlateText(ctx, px, py, pw, ph, opts) {
     const cx = px + pw / 2;
     const cy = py + ph / 2;
     const accent = opts.color || BRAND.laranja;
@@ -1487,44 +1648,6 @@
       }
       y += r.size + gap * k;
     });
-
-    // ---- 2b. Linha ao lado das setas "»|": chamada + contato ----
-    const side = molduraDef.side;
-    // As setas da moldura já fazem o papel do ">>", então tiramos do texto
-    const cta = String(opts.cta || '').replace(/\s*(>>|»|>)+\s*$/g, '').trim().toUpperCase();
-    const contact = String(opts.contact || '').trim();
-    if (side && (cta || contact)) {
-      const sx = side.x * scaleX;
-      const sy = side.y * scaleY;
-      const sw = side.w * scaleX;
-      const sh = side.h * scaleY;
-      const right = side.align === 'right';
-      const ax = right ? sx + sw : sx;
-      ctx.textAlign = right ? 'right' : 'left';
-      const both = cta && contact;
-      const scy = sy + sh / 2;
-      const ctaY = both ? scy - sh * 0.2 : scy;
-      const conY = both ? scy + sh * 0.24 : scy;
-
-      if (cta) {
-        L(ctx, opts, 'cta', { x: ax, y: ctaY }, () => {
-          const fs = fitFont(cta, '900 italic', Math.round(sh * (both ? 0.34 : 0.42)), sw, 14);
-          ctx.fillStyle = '#FFFFFF';
-          ctx.fillText(cta, ax, ctaY);
-          const tw = ctx.measureText(cta).width;
-          return { x: right ? ax - tw : ax, y: ctaY - fs / 2, w: tw, h: fs };
-        });
-      }
-      if (contact) {
-        L(ctx, opts, 'contact', { x: ax, y: conY }, () => {
-          const fs = fitFont(contact, '700', Math.round(sh * (both ? 0.24 : 0.34)), sw, 12);
-          ctx.fillStyle = accent;
-          ctx.fillText(contact, ax, conY);
-          const tw = ctx.measureText(contact).width;
-          return { x: right ? ax - tw : ax, y: conY - fs / 2, w: tw, h: fs };
-        });
-      }
-    }
 
     ctx.restore();
   }
@@ -1839,7 +1962,11 @@
         renderSeloMedalhao(ctx, W / 2, opts.exportMode === 'card' ? H / 2 : cardY + cardH / 2, 230, opts);
         break;
       default:
-        renderBalaoClean(ctx, cardX, cardY, cardW, cardH, opts);
+        if (DG.BALOES[opts.model]) {
+          renderBalaoPng(ctx, W, H, opts);
+        } else {
+          renderBalaoClean(ctx, cardX, cardY, cardW, cardH, opts);
+        }
         break;
     }
 

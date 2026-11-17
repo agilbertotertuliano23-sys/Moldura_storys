@@ -19,7 +19,7 @@ OUTPUT_PATH = os.path.join(BASE_DIR, 'DG Estetica - Gerador de Servicos e Preco.
 
 def to_base64_data_uri(file_path):
     ext = os.path.splitext(file_path)[1].lower()
-    mime = 'image/png' if ext == '.png' else ('image/jpeg' if ext in ('.jpg', '.jpeg') else 'application/octet-stream')
+    mime = {'.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp'}.get(ext, 'application/octet-stream')
     with open(file_path, 'rb') as f:
         data = base64.b64encode(f.read()).decode('utf-8')
     return f"data:{mime};base64,{data}"
@@ -66,34 +66,46 @@ def main():
                 app_js = app_js.replace(f"'assets/fotos/{fname}'", f"'{f_uri}'")
         print("  - Fotos de exemplo embutidas.")
 
-    # 4. Embutir Molduras
+    # 4. Molduras (embutidas no mapa abaixo; o app usa o mapa antes do caminho do arquivo)
     molduras_dir = os.path.join(BASE_DIR, 'assets', 'molduras')
-    if os.path.exists(molduras_dir):
-        for fname in os.listdir(molduras_dir):
-            if fname.endswith('.png'):
-                mpath = os.path.join(molduras_dir, fname)
-                m_uri = to_base64_data_uri(mpath)
-                # No app_js, substituir a rota da moldura
-                app_js = app_js.replace(f"'assets/molduras/' + m.file", f"window.DGMoldurasData[key]")
-        print("  - Molduras embutidas.")
 
-    # Preparar mapa de molduras para injeção no JS
+    # Preparar mapa de molduras, miniaturas e balões para injeção no JS
     molduras_dict = {}
-    if os.path.exists(molduras_dir):
-        from PIL import Image
-        for key, m_info in [
-            ('futurista', 'Moldura Automotiva Futurista com Logo.png'),
-            ('neon', 'Moldura Neon Automotiva DG.png'),
-            ('laranjaPreta', 'Moldura Automotiva Laranja e Preta.png'),
-            ('redesSociais', 'Moldura Neon Laranja para Redes Sociais.png')
-        ]:
-            m_file = os.path.join(molduras_dir, m_info)
-            if os.path.exists(m_file):
-                molduras_dict[key] = to_base64_data_uri(m_file)
+    for key, m_info in [
+        ('futurista', 'Moldura Automotiva Futurista com Logo.png'),
+        ('neon', 'Moldura Neon Automotiva DG.png'),
+        ('laranjaPreta', 'Moldura Automotiva Laranja e Preta.png'),
+        ('redesSociais', 'Moldura Neon Laranja para Redes Sociais.png'),
+        ('localizacao', 'localizacao.jpg')
+    ]:
+        m_file = os.path.join(molduras_dir, m_info)
+        if os.path.exists(m_file):
+            molduras_dict[key] = to_base64_data_uri(m_file)
+    premium_dir = os.path.join(molduras_dir, 'premium')
+    if os.path.isdir(premium_dir):
+        for fname in sorted(os.listdir(premium_dir)):
+            if fname.endswith('.webp'):
+                molduras_dict[fname[:-5]] = to_base64_data_uri(os.path.join(premium_dir, fname))
+    minis_dict = {}
+    mini_dir = os.path.join(molduras_dir, 'mini')
+    if os.path.isdir(mini_dir):
+        for fname in sorted(os.listdir(mini_dir)):
+            if fname.endswith('.webp'):
+                minis_dict[fname[:-5]] = to_base64_data_uri(os.path.join(mini_dir, fname))
+    baloes_dict = {}
+    baloes_dir = os.path.join(BASE_DIR, 'assets', 'baloes')
+    if os.path.isdir(baloes_dir):
+        for fname in sorted(os.listdir(baloes_dir)):
+            if fname.startswith('balao_') and fname.endswith('.png'):
+                baloes_dict['b' + fname[6:8]] = to_base64_data_uri(os.path.join(baloes_dir, fname))
+    print(f"  - {len(molduras_dict)} molduras, {len(minis_dict)} miniaturas e {len(baloes_dict)} balões embutidos.")
 
+    import json
     inject_js = f"""
     <script>
-    window.DGMoldurasData = {str(molduras_dict).replace("'", '"')};
+    window.DGMoldurasData = {json.dumps(molduras_dict)};
+    window.DGMinisData = {json.dumps(minis_dict)};
+    window.DGBaloesData = {json.dumps(baloes_dict)};
     </script>
     """
 
@@ -105,7 +117,7 @@ def main():
     </script>
     <script>
     // Ajuste de carregamento para versão embutida
-    {app_js.replace("img.src = 'assets/molduras/' + m.file;", "img.src = (window.DGMoldurasData && window.DGMoldurasData[key]) || ('assets/molduras/' + m.file);")}
+    {app_js}
     </script>
     """
 

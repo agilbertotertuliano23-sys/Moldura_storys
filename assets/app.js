@@ -6,7 +6,7 @@
 (function () {
   'use strict';
 
-  const { render, BRAND, MODELS, MOLDURAS, PRESETS } = window.DG;
+  const { render, BRAND, MODELS, MOLDURAS, BALOES, PRESETS } = window.DG;
 
   // Elementos do DOM
   const $ = (id) => document.getElementById(id);
@@ -45,6 +45,7 @@
     // Imagens carregadas
     logoImage: null,
     molduraImages: {},
+    balaoImages: {},
     // Elementos manipuláveis: { modo: { chave: {dx, dy, s} } } e a seleção atual
     layersByMode: {},
     sel: null,
@@ -60,17 +61,29 @@
   };
   logoImg.src = 'assets/logo-dg.png';
 
-  // Pré-carregar Molduras
-  Object.entries(MOLDURAS).forEach(([key, m]) => {
+  // Molduras e balões em PNG: cada um só é baixado quando é escolhido
+  const embedded = (key) => window.DGMoldurasData && window.DGMoldurasData[key];
+  function ensureMoldura(key) {
+    const m = MOLDURAS[key];
+    if (!m || state.molduraImages[key]) return;
     const img = new Image();
+    state.molduraImages[key] = img;
     img.onload = () => {
-      state.molduraImages[key] = img;
-      if (state.exportMode === 'molduraStory' && state.molduraKey === key) {
-        scheduleDraw();
-      }
+      if (state.exportMode === 'molduraStory' && state.molduraKey === key) scheduleDraw();
     };
-    img.src = 'assets/molduras/' + m.file;
-  });
+    img.src = embedded(key) || ('assets/molduras/' + encodeURI(m.file));
+  }
+  function ensureBalao(key) {
+    const b = BALOES[key];
+    if (!b || state.balaoImages[key]) return;
+    const img = new Image();
+    state.balaoImages[key] = img;
+    img.onload = () => {
+      if (state.model === key) scheduleDraw();
+    };
+    img.src = (window.DGBaloesData && window.DGBaloesData[key]) || ('assets/baloes/' + b.file);
+  }
+  ensureMoldura(state.molduraKey);
 
   // Carregar Foto de Exemplo Inicial
   const sampleInitial = new Image();
@@ -87,6 +100,7 @@
     renderPresetsBar();
     renderFormatOptions();
     renderModelOptions();
+    renderBalaoOptions();
     renderMolduraOptions();
     renderIconsGrid();
     setupExtras();
@@ -181,8 +195,30 @@
   }
 
   function syncModelCards() {
-    $$('.model-card').forEach(c => {
+    $$('.model-card, .balao-card').forEach(c => {
       c.classList.toggle('active', c.dataset.model === state.model);
+    });
+  }
+
+  // 3b. Balões prontos em PNG
+  function renderBalaoOptions() {
+    const container = $('balaoOptions');
+    if (!container) return;
+    container.innerHTML = '';
+    Object.entries(BALOES).forEach(([key, b]) => {
+      const card = document.createElement('button');
+      card.type = 'button';
+      card.className = 'balao-card' + (key === state.model ? ' active' : '');
+      card.dataset.model = key;
+      card.setAttribute('aria-label', b.label);
+      card.innerHTML = `<img src="${(window.DGBaloesData && window.DGBaloesData[key]) || ('assets/baloes/' + b.file)}" alt="" loading="lazy">`;
+      card.onclick = () => {
+        state.model = key;
+        ensureBalao(key);
+        syncModelCards();
+        scheduleDraw();
+      };
+      container.appendChild(card);
     });
   }
 
@@ -190,18 +226,28 @@
   function renderMolduraOptions() {
     const container = $('molduraOptions');
     container.innerHTML = '';
+    let lastGroup = null;
     Object.entries(MOLDURAS).forEach(([key, m]) => {
+      const group = m.group === 'premium' ? 'Premium' : 'Oficiais DG';
+      if (group !== lastGroup) {
+        const h = document.createElement('p');
+        h.className = 'frame-group';
+        h.textContent = group;
+        container.appendChild(h);
+        lastGroup = group;
+      }
       const card = document.createElement('button');
       card.type = 'button';
       card.className = 'frame-card moldura-card' + (key === state.molduraKey ? ' active' : '');
       card.dataset.moldura = key;
       card.setAttribute('aria-label', 'Moldura ' + m.label);
       card.innerHTML = `
-        <span class="frame-thumb"><img src="${(window.DGMoldurasData && window.DGMoldurasData[key]) || ('assets/molduras/' + encodeURI(m.file))}" alt=""></span>
+        <span class="frame-thumb"><img src="${(window.DGMinisData && window.DGMinisData[key]) || ('assets/molduras/mini/' + key + '.webp')}" alt="" loading="lazy"></span>
         <span class="frame-name">${m.label}</span>
       `;
       card.onclick = () => {
         state.molduraKey = key;
+        ensureMoldura(key);
         $$('.moldura-card').forEach(c => c.classList.remove('active'));
         card.classList.add('active');
         scheduleDraw();
@@ -1026,6 +1072,7 @@
   function performDraw() {
     const opts = Object.assign({}, state, {
       molduraImage: state.molduraImages[state.molduraKey],
+      balaoImage: state.balaoImages[state.model],
       layers: layersFor()
     });
 

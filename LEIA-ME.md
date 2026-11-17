@@ -40,6 +40,12 @@ Inspirado na arquitetura do gerador da Adega Sousa, o sistema permite carregar *
 - **Selo Medalhão DG:**
   Medalhão circular compacto com logo ou valor em destaque para aplicar no canto das imagens.
 
+
+### 3. Molduras e balões prontos (17/11/2026)
+- **25 molduras de Story:** as 4 oficiais, o modelo **Localização** (já vem com foto própria, a foto escolhida não aparece) e **20 molduras premium** (`assets/molduras/premium/`, WebP 1080 × 1920). Nas premium, quando o texto cai sobre a foto, ele ganha uma placa escura translúcida.
+- **20 balões prontos** (`assets/baloes/`) em "Story", "Feed" e "Só o balão": serviço, complemento e preço dentro do balão; a chamada vai embaixo.
+- As miniaturas ficam em `assets/molduras/mini/`; cada moldura só é baixada quando é escolhida.
+
 ---
 
 ## 📸 Enquadramento de Qualquer Foto de Story
