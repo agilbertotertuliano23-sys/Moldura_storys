@@ -41,7 +41,7 @@ def main():
 
     # 1. Embutir CSS
     html = re.sub(
-        r'<link rel="stylesheet" href="assets/style.css">',
+        r'<link rel="stylesheet" href="assets/style\.css(?:\?v=[^"]*)?">',
         f'<style>\n{css}\n</style>',
         html
     )
@@ -110,7 +110,7 @@ def main():
     """
 
     html = re.sub(
-        r'<script src="assets/render.js"></script>\s*<script src="assets/app.js"></script>',
+        r'<script src="assets/render\.js(?:\?v=[^"]*)?"></script>\s*<script src="assets/app\.js(?:\?v=[^"]*)?"></script>',
         lambda m: bundle_js,
         html
     )
