@@ -47,6 +47,7 @@
     molduraImages: {},
     balaoImages: {},
     plateBoxes: false, // quadrados escuros atrás do texto nas molduras premium
+    hiddenByMode: {}, // itens excluídos da prévia, por formato/moldura
     // Elementos manipuláveis: { modo: { chave: {dx, dy, s} } } e a seleção atual
     layersByMode: {},
     sel: null,
@@ -429,6 +430,19 @@
     bindText('inpCta', 'cta');
     bindText('inpContact', 'contact');
 
+    // Contato fica guardado neste aparelho: não precisa digitar de novo a cada visita
+    const CONTACT_KEY = 'dg-gerador-contato';
+    try {
+      const saved = localStorage.getItem(CONTACT_KEY);
+      if (saved && !$('inpContact').value) {
+        $('inpContact').value = saved;
+        state.contact = saved;
+      }
+    } catch (err) {}
+    $('inpContact').addEventListener('input', () => {
+      try { localStorage.setItem(CONTACT_KEY, $('inpContact').value.trim()); } catch (err) {}
+    });
+
     $('chkPlateBoxes').onchange = (e) => {
       state.plateBoxes = e.target.checked;
       scheduleDraw();
@@ -505,6 +519,7 @@
       del.setAttribute('aria-label', 'Apagar este texto');
       del.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>';
       del.onclick = () => {
+        pushHistory();
         state.extras = state.extras.filter((x) => x !== e);
         Object.values(state.layersByMode).forEach((m) => { delete m['x:' + e.id]; });
         if (state.sel === 'x:' + e.id) state.sel = null;
@@ -524,6 +539,7 @@
 
   function setupExtras() {
     $('btnAddText').onclick = () => {
+      pushHistory();
       const n = state.extras.length;
       // Na moldura, a parte de cima é foto livre; nos balões, o meio da arte
       const baseY = state.exportMode === 'molduraStory' ? 0.2 : 0.36;
@@ -579,6 +595,99 @@
     const k = modeKey();
     return state.layersByMode[k] || (state.layersByMode[k] = {});
   }
+  function hiddenFor() {
+    const k = modeKey();
+    return state.hiddenByMode[k] || (state.hiddenByMode[k] = {});
+  }
+
+  // ---- Desfazer / refazer: posição, tamanho, itens excluídos e textos extras ----
+  const undoStack = [];
+  const redoStack = [];
+  function snapshot() {
+    return JSON.stringify({ l: state.layersByMode, h: state.hiddenByMode, x: state.extras });
+  }
+  function pushHistory() {
+    const snap = snapshot();
+    if (undoStack[undoStack.length - 1] === snap) return;
+    undoStack.push(snap);
+    if (undoStack.length > 60) undoStack.shift();
+    redoStack.length = 0;
+    syncHistoryButtons();
+  }
+  // Agrupa uma sequência rápida (roda do mouse, setas) num passo só
+  let historyTimer = 0;
+  function pushHistoryOnce() {
+    if (!historyTimer) pushHistory();
+    clearTimeout(historyTimer);
+    historyTimer = setTimeout(() => { historyTimer = 0; }, 700);
+  }
+  function restoreSnap(snap) {
+    const o = JSON.parse(snap);
+    state.layersByMode = o.l;
+    state.hiddenByMode = o.h;
+    state.extras = o.x;
+    if (state.sel && String(state.sel).indexOf('x:') === 0 && !state.extras.some((e) => 'x:' + e.id === state.sel)) state.sel = null;
+    renderExtras();
+    queueDraw();
+    syncHistoryButtons();
+  }
+  function undo() {
+    if (!undoStack.length) return;
+    redoStack.push(snapshot());
+    restoreSnap(undoStack.pop());
+  }
+  function redo() {
+    if (!redoStack.length) return;
+    undoStack.push(snapshot());
+    restoreSnap(redoStack.pop());
+  }
+  function syncHistoryButtons() {
+    $('btnUndo').disabled = !undoStack.length;
+    $('btnRedo').disabled = !redoStack.length;
+  }
+
+  // ---- Excluir, duplicar e centralizar o item escolhido ----
+  function deleteLayer(key) {
+    if (!key) return;
+    pushHistory();
+    const name = labelFor(key);
+    if (String(key).indexOf('x:') === 0) {
+      const id = key.slice(2);
+      state.extras = state.extras.filter((x) => String(x.id) !== id);
+      Object.values(state.layersByMode).forEach((m) => { delete m[key]; });
+      renderExtras();
+    } else {
+      hiddenFor()[key] = true;
+    }
+    state.sel = null;
+    queueDraw();
+    showToast(name + ' excluído. Ctrl+Z ou "Desfazer" traz de volta.');
+  }
+  function duplicateExtra(key) {
+    if (!key || String(key).indexOf('x:') !== 0) return;
+    const src = state.extras.find((x) => 'x:' + x.id === key);
+    if (!src) return;
+    pushHistory();
+    const e = Object.assign({}, src, { id: ++extraSeq, y: Math.min(0.92, (Number(src.y) || 0.3) + 0.06) });
+    state.extras.push(e);
+    const l = layersFor()[key];
+    if (l) layersFor()['x:' + e.id] = Object.assign({}, l);
+    renderExtras();
+    state.sel = 'x:' + e.id;
+    queueDraw();
+  }
+  function centerLayer(key) {
+    const h = key && findHit(key);
+    const dg = canvas._dg;
+    if (!h || !dg) return;
+    pushHistory();
+    nudge(key, dg.W / 2 - (h.x0 + h.x1) / 2, 0);
+  }
+  function hiddenCount() {
+    const h = hiddenFor();
+    return Object.keys(h).filter((k) => h[k]).length;
+  }
+
   function layerOf(key) {
     const all = layersFor();
     return all[key] || (all[key] = { dx: 0, dy: 0, s: 1 });
@@ -689,6 +798,12 @@
     const slider = $('layerScale');
     slider.disabled = !has;
     $('btnLayerReset').disabled = !has;
+    $('btnLayerDelete').disabled = !has;
+    $('btnLayerCenter').disabled = !has;
+    $('btnLayerDup').hidden = !(has && String(state.sel).indexOf('x:') === 0);
+    const nh = hiddenCount();
+    $('btnRestoreHidden').hidden = !nh;
+    $('btnRestoreHidden').textContent = 'Mostrar excluídos (' + nh + ')';
     document.querySelectorAll('.nudge-btn').forEach((b) => { b.disabled = !has; });
     if (has) {
       const s = layerOf(state.sel).s;
@@ -736,6 +851,7 @@
       const h = hitAt(p);
       if (!h) { select(null); return; }
       select(h.key);
+      pushHistory();
       const l = layerOf(h.key);
       drag = { mode: 'move', key: h.key, start: p, l0: { dx: l.dx, dy: l.dy }, inv: h.inv };
       canvas.setPointerCapture(e.pointerId);
@@ -753,6 +869,7 @@
       if (e.touches.length === 2 && state.sel) {
         e.preventDefault();
         drag = null;
+        pushHistory();
         pinch = { d0: Math.max(20, touchDist(e.touches)), s0: layerOf(state.sel).s };
         return;
       }
@@ -774,6 +891,7 @@
       if (!h) return;
       const p = toLogical(e);
       const d0 = Math.max(24, Math.hypot(p.x - h.px, p.y - h.py));
+      pushHistory();
       drag = { mode: 'scale', key: h.key, pivot: { x: h.px, y: h.py }, d0: d0, s0: layerOf(h.key).s };
       selHandle.setPointerCapture(e.pointerId);
       e.preventDefault();
@@ -789,6 +907,7 @@
       if (!h) return;
       e.preventDefault();
       select(h.key);
+      pushHistoryOnce();
       const l = layerOf(h.key);
       l.s = clamp(l.s * (e.deltaY < 0 ? 1.06 : 0.94), 0.25, 3);
       queueDraw();
@@ -798,6 +917,7 @@
     canvas.addEventListener('dblclick', (e) => {
       const h = hitAt(toLogical(e));
       if (!h) return;
+      pushHistory();
       delete layersFor()[h.key];
       queueDraw();
     });
@@ -805,23 +925,55 @@
     // Painel de ajuste
     $('layerScale').oninput = (e) => {
       if (!state.sel) return;
+      pushHistoryOnce();
       layerOf(state.sel).s = Number(e.target.value);
       queueDraw();
     };
     document.querySelectorAll('.nudge-btn').forEach((b) => {
       b.onclick = () => {
-        if (state.sel) nudge(state.sel, Number(b.dataset.nx) * 6, Number(b.dataset.ny) * 6);
+        if (!state.sel) return;
+        pushHistoryOnce();
+        nudge(state.sel, Number(b.dataset.nx) * 6, Number(b.dataset.ny) * 6);
       };
     });
     $('btnLayerReset').onclick = () => {
       if (!state.sel) return;
+      pushHistory();
       delete layersFor()[state.sel];
       queueDraw();
     };
     $('btnLayerResetAll').onclick = () => {
+      pushHistory();
       state.layersByMode[modeKey()] = {};
+      state.hiddenByMode[modeKey()] = {};
       queueDraw();
     };
+    $('btnLayerDelete').onclick = () => deleteLayer(state.sel);
+    $('btnLayerDup').onclick = () => duplicateExtra(state.sel);
+    $('btnLayerCenter').onclick = () => centerLayer(state.sel);
+    $('btnUndo').onclick = undo;
+    $('btnRedo').onclick = redo;
+    $('btnRestoreHidden').onclick = () => {
+      pushHistory();
+      state.hiddenByMode[modeKey()] = {};
+      queueDraw();
+      showToast('Itens excluídos de volta na prévia.');
+    };
+    // X vermelho no canto da seleção
+    const selDel = $('selDelete');
+    selDel.addEventListener('pointerdown', (e) => { e.stopPropagation(); e.preventDefault(); });
+    selDel.addEventListener('click', (e) => { e.stopPropagation(); deleteLayer(state.sel); });
+
+    // Ctrl+Z / Ctrl+Y valem mesmo sem item escolhido (fora dos campos de texto)
+    document.addEventListener('keydown', (e) => {
+      const t = e.target;
+      if (t && /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName)) return;
+      if (!(e.ctrlKey || e.metaKey)) return;
+      const k = e.key.toLowerCase();
+      if (k === 'z' && !e.shiftKey) { e.preventDefault(); undo(); }
+      else if (k === 'y' || (k === 'z' && e.shiftKey)) { e.preventDefault(); redo(); }
+      else if (k === 'd' && state.sel) { e.preventDefault(); duplicateExtra(state.sel); }
+    });
 
     // Teclado: setas movem, + / − redimensionam, Esc solta
     document.addEventListener('keydown', (e) => {
@@ -832,9 +984,14 @@
       const arrows = { ArrowLeft: [-step, 0], ArrowRight: [step, 0], ArrowUp: [0, -step], ArrowDown: [0, step] };
       if (arrows[e.key]) {
         e.preventDefault();
+        pushHistoryOnce();
         nudge(state.sel, arrows[e.key][0], arrows[e.key][1]);
+      } else if (e.key === 'Delete' || e.key === 'Backspace') {
+        e.preventDefault();
+        deleteLayer(state.sel);
       } else if (e.key === '+' || e.key === '=' || e.key === '-' || e.key === '_') {
         e.preventDefault();
+        pushHistoryOnce();
         const l = layerOf(state.sel);
         l.s = clamp(l.s * (e.key === '+' || e.key === '=' ? 1.05 : 0.95), 0.25, 3);
         queueDraw();
@@ -1080,6 +1237,7 @@
     const opts = Object.assign({}, state, {
       molduraImage: state.molduraImages[state.molduraKey],
       balaoImage: state.balaoImages[state.model],
+      hiddenLayers: hiddenFor(),
       layers: layersFor()
     });
 

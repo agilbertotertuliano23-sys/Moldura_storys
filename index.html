@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Exo+2:ital,wght@0,500;0,700;0,800;0,900;1,700;1,800;1,900&family=Poppins:ital,wght@0,400;0,600;0,700;0,800;0,900;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
 
-  <link rel="stylesheet" href="assets/style.css?v=20261117d">
+  <link rel="stylesheet" href="assets/style.css?v=20261117e">
 </head>
 <body>
 
@@ -277,6 +277,9 @@
         <div class="sel-box" id="selBox" hidden>
           <span class="sel-label" id="selLabel"></span>
           <i class="sel-handle" id="selHandle" title="Arraste para redimensionar"></i>
+          <button type="button" class="sel-del" id="selDelete" title="Excluir este item (Delete)" aria-label="Excluir este item">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+          </button>
         </div>
       </div>
 
@@ -286,8 +289,8 @@
       <div class="layer-bar" id="layerBar">
         <div class="layer-head">
           <strong>Mover e ajustar</strong>
-          <small class="hint-mouse">Escolha um item ou clique nele na prévia. Arraste para mover; roda do mouse ou bolinha do canto para o tamanho; duplo clique devolve ao lugar.</small>
-          <small class="hint-touch">Escolha um item ou toque nele na prévia. Arraste para mover; pinça com dois dedos para o tamanho. Fora dos textos, o dedo rola a página.</small>
+          <small class="hint-mouse">Escolha um item ou clique nele na prévia. Arraste para mover; roda do mouse ou bolinha do canto para o tamanho; duplo clique devolve ao lugar; Delete ou o X exclui; Ctrl+Z desfaz.</small>
+          <small class="hint-touch">Escolha um item ou toque nele na prévia. Arraste para mover; pinça com dois dedos para o tamanho; o X exclui. Fora dos textos, o dedo rola a página.</small>
         </div>
         <div class="layer-chips" id="layerChips"></div>
         <div class="layer-controls" id="layerControls">
@@ -304,9 +307,17 @@
             <button type="button" class="nudge-btn" data-nx="0" data-ny="1" disabled aria-label="Descer">▼</button>
           </div>
           <div class="layer-actions">
+            <button type="button" class="btn btn-danger" id="btnLayerDelete" disabled>Excluir</button>
+            <button type="button" class="btn btn-secondary" id="btnLayerDup" hidden>Duplicar</button>
+            <button type="button" class="btn btn-secondary" id="btnLayerCenter" disabled>Centralizar</button>
             <button type="button" class="btn btn-secondary" id="btnLayerReset" disabled>Voltar ao lugar</button>
             <button type="button" class="btn btn-secondary" id="btnLayerResetAll">Voltar tudo</button>
           </div>
+        </div>
+        <div class="layer-history">
+          <button type="button" class="btn btn-secondary" id="btnUndo" disabled title="Desfazer (Ctrl+Z)">↶ Desfazer</button>
+          <button type="button" class="btn btn-secondary" id="btnRedo" disabled title="Refazer (Ctrl+Y)">↷ Refazer</button>
+          <button type="button" class="btn btn-secondary" id="btnRestoreHidden" hidden>Mostrar excluídos</button>
         </div>
       </div>
     </main>
@@ -358,7 +369,7 @@
     </div>
   </div>
 
-  <script src="assets/render.js?v=20261117d"></script>
-  <script src="assets/app.js?v=20261117d"></script>
+  <script src="assets/render.js?v=20261117e"></script>
+  <script src="assets/app.js?v=20261117e"></script>
 </body>
 </html>

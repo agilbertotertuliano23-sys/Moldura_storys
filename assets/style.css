@@ -1628,3 +1628,47 @@ details.more > .icons-grid { padding: 2px 14px 14px; }
 
 /* Opção dos quadrados atrás do texto, logo abaixo das molduras */
 #groupBoxes { margin-top: 12px; }
+
+/* Excluir item: X no canto da seleção e botão na barra */
+.sel-del {
+  position: absolute;
+  right: -12px;
+  top: -12px;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  border: 2px solid #FFFFFF;
+  border-radius: 50%;
+  background: #E5484D;
+  color: #FFFFFF;
+  cursor: pointer;
+  pointer-events: auto;
+  touch-action: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+}
+.sel-del svg { width: 12px; height: 12px; stroke: currentColor; stroke-width: 3; fill: none; stroke-linecap: round; }
+.sel-del:hover { background: #F2555A; }
+.btn-danger {
+  background: rgba(229, 72, 77, 0.14);
+  border: 1px solid rgba(229, 72, 77, 0.55);
+  color: #FF8A8E;
+  border-radius: 10px;
+  font-family: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+.btn-danger:hover:not(:disabled) { background: rgba(229, 72, 77, 0.24); }
+.layer-history {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+.layer-history .btn { padding: 8px 12px; font-size: 12px; }
+.layer-history .btn:disabled { opacity: 0.4; cursor: default; }
+@media (max-width: 760px) {
+  .sel-del { width: 32px; height: 32px; right: -16px; top: -16px; }
+  .sel-del svg { width: 14px; height: 14px; }
+}

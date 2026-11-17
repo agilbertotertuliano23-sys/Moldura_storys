@@ -567,6 +567,8 @@
      fn deve devolver a caixa {x,y,w,h} do elemento no seu espaço local.
      ======================================================================== */
   function L(ctx, opts, key, pivot, fn) {
+    // Item excluído pela pessoa: não desenha e não entra na seleção
+    if (opts.hiddenLayers && opts.hiddenLayers[key]) return null;
     const lay = (opts.layers && opts.layers[key]) || null;
     const dx = lay ? Number(lay.dx) || 0 : 0;
     const dy = lay ? Number(lay.dy) || 0 : 0;
