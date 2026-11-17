@@ -66,36 +66,36 @@
     }
   };
 
-  // Molduras PNG disponíveis (coordenadas no pixel da imagem original 998 x 1576)
+  // Molduras PNG disponíveis (coordenadas no pixel da imagem 998 x 1576, já sem margem: o desenho encosta nas bordas)
   // plate = placa tracejada; side = linha livre ao lado das setas "»|"
   DG.MOLDURAS = {
     futurista: {
       id: 'futurista',
       label: 'Futurista',
       file: 'Moldura Automotiva Futurista com Logo.png',
-      plate: { x: 30, y: 935, w: 840, h: 222 },
-      side: { x: 186, y: 1282, w: 385, h: 112, align: 'left' }
+      plate: { x: 19, y: 945, w: 850, h: 224 },
+      side: { x: 177, y: 1295, w: 390, h: 113, align: 'left' }
     },
     neon: {
       id: 'neon',
       label: 'Neon',
       file: 'Moldura Neon Automotiva DG.png',
-      plate: { x: 532, y: 1400, w: 408, h: 96 },
-      side: { x: 40, y: 1398, w: 372, h: 100, align: 'right' }
+      plate: { x: 523, y: 1415, w: 415, h: 97 },
+      side: { x: 22, y: 1413, w: 379, h: 101, align: 'right' }
     },
     laranjaPreta: {
       id: 'laranjaPreta',
       label: 'Laranja e Preta',
       file: 'Moldura Automotiva Laranja e Preta.png',
-      plate: { x: 35, y: 928, w: 830, h: 228 },
-      side: { x: 195, y: 1298, w: 400, h: 112, align: 'left' }
+      plate: { x: 3, y: 947, w: 876, h: 233 },
+      side: { x: 172, y: 1324, w: 422, h: 114, align: 'left' }
     },
     redesSociais: {
       id: 'redesSociais',
       label: 'Redes Sociais',
       file: 'Moldura Neon Laranja para Redes Sociais.png',
-      plate: { x: 52, y: 942, w: 886, h: 220 },
-      side: { x: 195, y: 1366, w: 410, h: 112, align: 'left' }
+      plate: { x: 20, y: 961, w: 928, h: 224 },
+      side: { x: 170, y: 1393, w: 429, h: 114, align: 'left' }
     }
   };
 
@@ -111,26 +111,26 @@
   // Molduras premium 1080 x 1920 (assets/molduras/premium/pNN.webp).
   // bg = a área fica sobre a foto: ganha uma placa escura translúcida para ler bem.
   [
-    ['p01', 'Asa esquerda', { x: 100, y: 1236, w: 640, h: 220, bg: true }, { x: 190, y: 1478, w: 450, h: 128, align: 'left' }],
-    ['p02', 'Asa direita', { x: 390, y: 1350, w: 570, h: 220, bg: true }, { x: 400, y: 1608, w: 520, h: 84, align: 'center' }],
-    ['p03', 'Cantos diagonais', { x: 170, y: 1425, w: 465, h: 170 }, { x: 110, y: 1280, w: 560, h: 100, align: 'left', bg: true }],
-    ['p04', 'Canopla', { x: 140, y: 1100, w: 800, h: 220, bg: true }, { x: 220, y: 1346, w: 640, h: 80, align: 'center', bg: true }],
-    ['p05', 'Coluna S', { x: 110, y: 1392, w: 520, h: 222 }, { x: 330, y: 1240, w: 560, h: 100, align: 'left', bg: true }],
-    ['p06', 'Arco halo', { x: 140, y: 1170, w: 800, h: 220, bg: true }, { x: 140, y: 1410, w: 800, h: 90, align: 'center', bg: true }],
-    ['p07', 'Colunas turbina', { x: 150, y: 1410, w: 780, h: 220, bg: true }, { x: 190, y: 1672, w: 700, h: 86, align: 'center' }],
-    ['p08', 'Quatro cantos', { x: 140, y: 1280, w: 800, h: 220, bg: true }, { x: 306, y: 1680, w: 378, h: 80, align: 'center' }],
-    ['p09', 'Racing vermelho', { x: 470, y: 1585, w: 470, h: 142 }, { x: 430, y: 1455, w: 560, h: 96, align: 'left', bg: true }],
-    ['p10', 'Velocímetro', { x: 170, y: 1110, w: 600, h: 220, bg: true }, { x: 175, y: 1560, w: 460, h: 102, align: 'left' }],
-    ['p11', 'V invertido', { x: 150, y: 1425, w: 780, h: 175, bg: true }, { x: 360, y: 1296, w: 580, h: 100, align: 'left', bg: true }],
-    ['p12', 'Colmeia', { x: 110, y: 1070, w: 820, h: 220, bg: true }, { x: 410, y: 1610, w: 306, h: 76, align: 'center' }],
-    ['p13', 'Faixas opostas', { x: 100, y: 1240, w: 700, h: 220, bg: true }, { x: 100, y: 1480, w: 520, h: 90, align: 'left', bg: true }],
-    ['p14', 'Módulos flutuantes', { x: 110, y: 1250, w: 860, h: 220, bg: true }, { x: 330, y: 1610, w: 580, h: 100, align: 'center' }],
-    ['p15', 'Escudo inferior', { x: 140, y: 1010, w: 800, h: 220, bg: true }, { x: 190, y: 1245, w: 700, h: 88, align: 'center', bg: true }],
-    ['p16', 'Bumerangues', { x: 90, y: 1040, w: 760, h: 220, bg: true }, { x: 205, y: 1292, w: 555, h: 116, align: 'left' }],
-    ['p17', 'Hélice direita', { x: 110, y: 1220, w: 720, h: 220, bg: true }, { x: 130, y: 1640, w: 600, h: 96, align: 'left' }],
-    ['p18', 'Xadrez racing', { x: 380, y: 1240, w: 640, h: 220, bg: true }, { x: 380, y: 1480, w: 640, h: 90, align: 'right', bg: true }],
-    ['p19', 'Octógono aberto', { x: 220, y: 1290, w: 640, h: 210, bg: true }, { x: 195, y: 1582, w: 286, h: 88, align: 'center' }],
-    ['p20', 'Onda dupla', { x: 200, y: 1270, w: 760, h: 220, bg: true }, { x: 200, y: 1510, w: 560, h: 90, align: 'left', bg: true }]
+    ['p01', 'Asa esquerda', { x: 31, y: 1281, w: 741, h: 254, bg: true }, { x: 135, y: 1561, w: 521, h: 148, align: 'left' }],
+    ['p02', 'Asa direita', { x: 368, y: 1409, w: 654, h: 253, bg: true }, { x: 380, y: 1705, w: 597, h: 97, align: 'center' }],
+    ['p03', 'Cantos diagonais', { x: 116, y: 1499, w: 535, h: 196 }, { x: 47, y: 1332, w: 645, h: 115, align: 'left', bg: true }],
+    ['p04', 'Canopla', { x: 81, y: 1121, w: 918, h: 253, bg: true }, { x: 173, y: 1403, w: 735, h: 92, align: 'center', bg: true }],
+    ['p05', 'Coluna S', { x: 40, y: 1458, w: 606, h: 256 }, { x: 296, y: 1283, w: 652, h: 115, align: 'left', bg: true }],
+    ['p06', 'Arco halo', { x: 81, y: 1201, w: 918, h: 253, bg: true }, { x: 81, y: 1477, w: 918, h: 103, align: 'center', bg: true }],
+    ['p07', 'Colunas turbina', { x: 93, y: 1468, w: 895, h: 257, bg: true }, { x: 139, y: 1775, w: 803, h: 101, align: 'center' }],
+    ['p08', 'Quatro cantos', { x: 75, y: 1334, w: 932, h: 256, bg: true }, { x: 268, y: 1799, w: 440, h: 93, align: 'center' }],
+    ['p09', 'Racing vermelho', { x: 460, y: 1678, w: 539, h: 163 }, { x: 414, y: 1528, w: 636, h: 110, align: 'left', bg: true }],
+    ['p10', 'Velocímetro', { x: 116, y: 1132, w: 689, h: 253, bg: true }, { x: 122, y: 1649, w: 528, h: 117, align: 'left' }],
+    ['p11', 'V invertido', { x: 93, y: 1495, w: 895, h: 201, bg: true }, { x: 334, y: 1347, w: 666, h: 115, align: 'left', bg: true }],
+    ['p12', 'Colmeia', { x: 43, y: 1086, w: 951, h: 253, bg: true }, { x: 391, y: 1706, w: 355, h: 87, align: 'center' }],
+    ['p13', 'Faixas opostas', { x: 36, y: 1282, w: 803, h: 253, bg: true }, { x: 36, y: 1557, w: 597, h: 103, align: 'left', bg: true }],
+    ['p14', 'Módulos flutuantes', { x: 42, y: 1293, w: 998, h: 263, bg: true }, { x: 297, y: 1724, w: 673, h: 120, align: 'center' }],
+    ['p15', 'Escudo inferior', { x: 74, y: 1017, w: 930, h: 256, bg: true }, { x: 133, y: 1290, w: 814, h: 102, align: 'center', bg: true }],
+    ['p16', 'Bumerangues', { x: 30, y: 1057, w: 871, h: 255, bg: true }, { x: 153, y: 1349, w: 643, h: 135, align: 'left' }],
+    ['p17', 'Hélice direita', { x: 46, y: 1264, w: 827, h: 254, bg: true }, { x: 69, y: 1748, w: 689, h: 111, align: 'left' }],
+    ['p18', 'Xadrez racing', { x: 352, y: 1275, w: 698, h: 255, bg: true }, { x: 352, y: 1553, w: 698, h: 104, align: 'right', bg: true }],
+    ['p19', 'Octógono aberto', { x: 168, y: 1372, w: 746, h: 255, bg: true }, { x: 139, y: 1727, w: 333, h: 107, align: 'center' }],
+    ['p20', 'Onda dupla', { x: 145, y: 1320, w: 881, h: 256, bg: true }, { x: 145, y: 1599, w: 649, h: 105, align: 'left', bg: true }]
   ].forEach(([id, label, plate, side]) => {
     DG.MOLDURAS[id] = { id: id, label: label, file: 'premium/' + id + '.webp', group: 'premium', plate: plate, side: side };
   });

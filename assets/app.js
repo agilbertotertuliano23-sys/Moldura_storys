@@ -63,6 +63,8 @@
 
   // Molduras e balões em PNG: cada um só é baixado quando é escolhido
   const embedded = (key) => window.DGMoldurasData && window.DGMoldurasData[key];
+  // Versão das imagens: a Hostinger manda o navegador guardar por 7 dias
+  const ASSET_V = '?v=20261117c';
   function ensureMoldura(key) {
     const m = MOLDURAS[key];
     if (!m || state.molduraImages[key]) return;
@@ -71,7 +73,7 @@
     img.onload = () => {
       if (state.exportMode === 'molduraStory' && state.molduraKey === key) scheduleDraw();
     };
-    img.src = embedded(key) || ('assets/molduras/' + encodeURI(m.file));
+    img.src = embedded(key) || ('assets/molduras/' + encodeURI(m.file) + ASSET_V);
   }
   function ensureBalao(key) {
     const b = BALOES[key];
@@ -242,7 +244,7 @@
       card.dataset.moldura = key;
       card.setAttribute('aria-label', 'Moldura ' + m.label);
       card.innerHTML = `
-        <span class="frame-thumb"><img src="${(window.DGMinisData && window.DGMinisData[key]) || ('assets/molduras/mini/' + key + '.webp')}" alt="" loading="lazy"></span>
+        <span class="frame-thumb"><img src="${(window.DGMinisData && window.DGMinisData[key]) || ('assets/molduras/mini/' + key + '.webp' + ASSET_V)}" alt="" loading="lazy"></span>
         <span class="frame-name">${m.label}</span>
       `;
       card.onclick = () => {
