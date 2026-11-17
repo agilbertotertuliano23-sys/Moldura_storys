@@ -66,32 +66,45 @@
     }
   };
 
-  // Molduras PNG disponíveis
+  // Molduras PNG disponíveis (coordenadas no pixel da imagem original 998 x 1576)
+  // plate = placa tracejada; side = linha livre ao lado das setas "»|"
   DG.MOLDURAS = {
     futurista: {
       id: 'futurista',
-      label: 'Moldura Futurista com Logo',
+      label: 'Futurista',
       file: 'Moldura Automotiva Futurista com Logo.png',
-      plate: { x: 30, y: 940, w: 840, h: 220 }
+      plate: { x: 30, y: 935, w: 840, h: 222 },
+      side: { x: 186, y: 1282, w: 385, h: 112, align: 'left' }
     },
     neon: {
       id: 'neon',
-      label: 'Moldura Neon DG',
+      label: 'Neon',
       file: 'Moldura Neon Automotiva DG.png',
-      plate: { x: 530, y: 1370, w: 420, h: 100 }
+      plate: { x: 532, y: 1400, w: 408, h: 96 },
+      side: { x: 40, y: 1398, w: 372, h: 100, align: 'right' }
     },
     laranjaPreta: {
       id: 'laranjaPreta',
-      label: 'Moldura Laranja e Preta',
+      label: 'Laranja e Preta',
       file: 'Moldura Automotiva Laranja e Preta.png',
-      plate: { x: 35, y: 920, w: 830, h: 220 }
+      plate: { x: 35, y: 928, w: 830, h: 228 },
+      side: { x: 195, y: 1298, w: 400, h: 112, align: 'left' }
     },
     redesSociais: {
       id: 'redesSociais',
-      label: 'Moldura Neon Redes Sociais',
+      label: 'Redes Sociais',
       file: 'Moldura Neon Laranja para Redes Sociais.png',
-      plate: { x: 50, y: 930, w: 890, h: 230 }
+      plate: { x: 52, y: 942, w: 886, h: 220 },
+      side: { x: 195, y: 1366, w: 410, h: 112, align: 'left' }
     }
+  };
+
+  // Estilos dos textos extras que a pessoa adiciona em qualquer formato
+  DG.TEXT_STYLES = {
+    destaque: { label: 'Destaque' },
+    titulo: { label: 'Título' },
+    texto: { label: 'Texto' },
+    etiqueta: { label: 'Etiqueta' }
   };
 
   // Presets oficiais de serviços
@@ -556,7 +569,8 @@
     subtitle: 'Subtítulo',
     desc: 'Descrição',
     price: 'Preço',
-    cta: 'Botão (CTA)',
+    cta: 'Chamada',
+    contact: 'Contato',
     logo: 'Logotipo'
   };
 
@@ -1373,53 +1387,211 @@
 
     const cx = px + pw / 2;
     const cy = py + ph / 2;
+    const accent = opts.color || BRAND.laranja;
+    const FONT = '"Poppins", "Exo 2", sans-serif';
 
-    ctx.save();
-    // Título dentro da placa
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-
-    let curY = cy;
-    if (opts.subtitle || opts.desc || opts.price) {
-      curY = cy - 25;
+    // Mede uma linha e encolhe a fonte até caber na largura
+    function fitFont(text, weight, size, maxW, min) {
+      ctx.font = `${weight} ${size}px ${FONT}`;
+      while (size > min && ctx.measureText(text).width > maxW) {
+        size -= 1;
+        ctx.font = `${weight} ${size}px ${FONT}`;
+      }
+      return size;
     }
 
-    ctx.font = '900 italic 44px "Poppins", "Exo 2", sans-serif';
-    ctx.fillStyle = '#FFFFFF';
+    ctx.save();
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
     ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
     ctx.shadowBlur = 8;
 
-    L(ctx, opts, 'title', { x: cx, y: curY }, () => {
-    let titleFs = 44;
-    while (ctx.measureText(opts.title || 'SERVIÇO').width > pw - 40 && titleFs > 24) {
-      titleFs -= 2;
-      ctx.font = `900 italic ${titleFs}px "Poppins", "Exo 2", sans-serif`;
-    }
-    const tw = ctx.measureText((opts.title || 'SERVIÇO').toUpperCase()).width;
-    ctx.fillText((opts.title || 'SERVIÇO').toUpperCase(), cx, curY);
-    return { x: cx - tw / 2, y: curY - titleFs / 2, w: tw, h: titleFs };
+    // ---- 2a. Placa: título, subtítulo e linha de preço, empilhados e centrados ----
+    const title = String(opts.title || 'SERVIÇO').toUpperCase();
+    const subtitle = String(opts.subtitle || '').trim().toUpperCase();
+    const price = String(opts.price || '').trim();
+    const oldPrice = price ? String(opts.oldPrice || '').trim() : '';
+    // Placa baixa (moldura Neon): com preço, o complemento sai para caber sem apertar
+    const smallPlate = ph < 170;
+    const showSub = opts.plateSubtitle !== false && !!subtitle && !(smallPlate && price);
+
+    const rows = [{ key: 'title', size: ph * 0.30 }];
+    if (showSub) rows.push({ key: 'subtitle', size: ph * 0.14 });
+    if (price) rows.push({ key: 'price', size: ph * 0.22 });
+    const gap = ph * 0.05;
+    let total = rows.reduce((s, r) => s + r.size, 0) + gap * (rows.length - 1);
+    const k = Math.min(1, (ph * (smallPlate ? 0.74 : 0.82)) / total);
+    rows.forEach((r) => { r.size *= k; });
+    total = rows.reduce((s, r) => s + r.size, 0) + gap * k * (rows.length - 1);
+
+    let y = cy - total / 2;
+    const maxW = pw * 0.88;
+    rows.forEach((r) => {
+      const rowY = y + r.size / 2;
+      if (r.key === 'title') {
+        L(ctx, opts, 'title', { x: cx, y: rowY }, () => {
+          const fs = fitFont(title, '900 italic', Math.round(r.size), maxW, 16);
+          ctx.fillStyle = '#FFFFFF';
+          ctx.fillText(title, cx, rowY);
+          const tw = ctx.measureText(title).width;
+          return { x: cx - tw / 2, y: rowY - fs / 2, w: tw, h: fs };
+        });
+      } else if (r.key === 'subtitle') {
+        L(ctx, opts, 'subtitle', { x: cx, y: rowY }, () => {
+          const fs = fitFont(subtitle, '800 italic', Math.round(r.size), maxW, 12);
+          ctx.fillStyle = accent;
+          ctx.fillText(subtitle, cx, rowY);
+          const sw = ctx.measureText(subtitle).width;
+          return { x: cx - sw / 2, y: rowY - fs / 2, w: sw, h: fs };
+        });
+      } else if (r.key === 'price') {
+        L(ctx, opts, 'price', { x: cx, y: rowY }, () => {
+          // preço novo + preço antigo riscado ao lado, os dois cabendo na largura
+          let fs = Math.round(r.size);
+          let ofs = Math.round(fs * 0.62);
+          const measure = () => {
+            ctx.font = `900 italic ${fs}px ${FONT}`;
+            const pW = ctx.measureText(price).width;
+            ctx.font = `700 ${ofs}px ${FONT}`;
+            const oW = oldPrice ? ctx.measureText(oldPrice).width : 0;
+            return { pW: pW, oW: oW, all: pW + (oldPrice ? oW + fs * 0.5 : 0) };
+          };
+          let m = measure();
+          while (m.all > maxW && fs > 14) { fs -= 1; ofs = Math.round(fs * 0.62); m = measure(); }
+          const x0 = cx - m.all / 2;
+          if (oldPrice) {
+            ctx.textAlign = 'left';
+            ctx.font = `700 ${ofs}px ${FONT}`;
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.62)';
+            ctx.fillText(oldPrice, x0, rowY);
+            ctx.save();
+            ctx.shadowBlur = 0;
+            ctx.strokeStyle = accent;
+            ctx.lineWidth = Math.max(2, ofs * 0.1);
+            ctx.beginPath();
+            ctx.moveTo(x0 - 2, rowY + ofs * 0.04);
+            ctx.lineTo(x0 + m.oW + 2, rowY - ofs * 0.04);
+            ctx.stroke();
+            ctx.restore();
+            ctx.font = `900 italic ${fs}px ${FONT}`;
+            ctx.fillStyle = accent;
+            ctx.fillText(price, x0 + m.oW + fs * 0.5, rowY);
+            ctx.textAlign = 'center';
+          } else {
+            ctx.font = `900 italic ${fs}px ${FONT}`;
+            ctx.fillStyle = accent;
+            ctx.fillText(price, cx, rowY);
+          }
+          return { x: x0, y: rowY - fs / 2, w: m.all, h: fs };
+        });
+      }
+      y += r.size + gap * k;
     });
 
-    // Subtítulo ou Preço na linha de baixo
-    if (opts.price) {
-      L(ctx, opts, 'price', { x: cx, y: curY + 48 }, () => {
-      ctx.font = '900 italic 36px "Poppins", "Exo 2", sans-serif';
-      ctx.fillStyle = opts.color || BRAND.laranja;
-      ctx.fillText(opts.price, cx, curY + 48);
-      const pw = ctx.measureText(opts.price).width;
-      return { x: cx - pw / 2, y: curY + 48 - 22, w: pw, h: 44 };
-      });
-    } else if (opts.subtitle) {
-      L(ctx, opts, 'subtitle', { x: cx, y: curY + 44 }, () => {
-      ctx.font = '800 italic 24px "Poppins", "Exo 2", sans-serif';
-      ctx.fillStyle = opts.color || BRAND.laranja;
-      ctx.fillText(opts.subtitle.toUpperCase(), cx, curY + 44);
-      const sw = ctx.measureText(opts.subtitle.toUpperCase()).width;
-      return { x: cx - sw / 2, y: curY + 44 - 16, w: sw, h: 32 };
-      });
+    // ---- 2b. Linha ao lado das setas "»|": chamada + contato ----
+    const side = molduraDef.side;
+    // As setas da moldura já fazem o papel do ">>", então tiramos do texto
+    const cta = String(opts.cta || '').replace(/\s*(>>|»|>)+\s*$/g, '').trim().toUpperCase();
+    const contact = String(opts.contact || '').trim();
+    if (side && (cta || contact)) {
+      const sx = side.x * scaleX;
+      const sy = side.y * scaleY;
+      const sw = side.w * scaleX;
+      const sh = side.h * scaleY;
+      const right = side.align === 'right';
+      const ax = right ? sx + sw : sx;
+      ctx.textAlign = right ? 'right' : 'left';
+      const both = cta && contact;
+      const scy = sy + sh / 2;
+      const ctaY = both ? scy - sh * 0.2 : scy;
+      const conY = both ? scy + sh * 0.24 : scy;
+
+      if (cta) {
+        L(ctx, opts, 'cta', { x: ax, y: ctaY }, () => {
+          const fs = fitFont(cta, '900 italic', Math.round(sh * (both ? 0.34 : 0.42)), sw, 14);
+          ctx.fillStyle = '#FFFFFF';
+          ctx.fillText(cta, ax, ctaY);
+          const tw = ctx.measureText(cta).width;
+          return { x: right ? ax - tw : ax, y: ctaY - fs / 2, w: tw, h: fs };
+        });
+      }
+      if (contact) {
+        L(ctx, opts, 'contact', { x: ax, y: conY }, () => {
+          const fs = fitFont(contact, '700', Math.round(sh * (both ? 0.24 : 0.34)), sw, 12);
+          ctx.fillStyle = accent;
+          ctx.fillText(contact, ax, conY);
+          const tw = ctx.measureText(contact).width;
+          return { x: right ? ax - tw : ax, y: conY - fs / 2, w: tw, h: fs };
+        });
+      }
     }
 
     ctx.restore();
+  }
+
+  /* ========================================================================
+     TEXTOS EXTRAS: a pessoa adiciona quantos quiser, em qualquer formato.
+     Cada um é uma camada própria (arrasta, amplia, reseta).
+     opts.extras = [{ id, text, style, x, y }]  x/y = posição 0..1 do canvas
+     ======================================================================== */
+  function drawExtras(ctx, W, H, opts) {
+    const list = Array.isArray(opts.extras) ? opts.extras : [];
+    const accent = opts.color || BRAND.laranja;
+    const FONT = '"Poppins", "Exo 2", sans-serif';
+    const SPEC = {
+      destaque: { font: '900 italic', size: 64, color: accent },
+      titulo: { font: '900 italic', size: 76, color: '#FFFFFF' },
+      texto: { font: '600', size: 38, color: '#FFFFFF' },
+      etiqueta: { font: '900 italic', size: 40, color: '#111114' }
+    };
+
+    list.forEach((e) => {
+      const text = String(e.text || '').trim();
+      if (!text) return;
+      const spec = SPEC[e.style] || SPEC.destaque;
+      const cx = (Number(e.x) || 0.5) * W;
+      const cy = (Number(e.y) || 0.3) * H;
+      const upper = e.style !== 'texto';
+
+      L(ctx, opts, 'x:' + e.id, { x: cx, y: cy }, () => {
+        ctx.save();
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.font = `${spec.font} ${spec.size}px ${FONT}`;
+        const maxW = W - 120;
+        const lines = [];
+        text.split(/\n/).forEach((para) => {
+          const t = upper ? para.toUpperCase() : para;
+          const wrapped = wrapText(ctx, t, maxW);
+          if (wrapped.length) wrapped.forEach((l) => lines.push(l)); else lines.push('');
+        });
+        const lh = spec.size * 1.12;
+        const blockH = lh * lines.length;
+        const widest = Math.max.apply(null, lines.map((l) => ctx.measureText(l).width).concat([10]));
+        let box;
+
+        if (e.style === 'etiqueta') {
+          const padX = spec.size * 0.6;
+          const padY = spec.size * 0.32;
+          box = { x: cx - widest / 2 - padX, y: cy - blockH / 2 - padY, w: widest + padX * 2, h: blockH + padY * 2 };
+          ctx.shadowColor = 'rgba(255, 106, 0, 0.55)';
+          ctx.shadowBlur = 24;
+          ctx.fillStyle = accent;
+          drawRoundedRect(ctx, box.x, box.y, box.w, box.h, Math.min(box.h / 2, 999));
+          ctx.fill();
+          ctx.shadowBlur = 0;
+        } else {
+          ctx.shadowColor = 'rgba(0, 0, 0, 0.75)';
+          ctx.shadowBlur = 12;
+          box = { x: cx - widest / 2, y: cy - blockH / 2, w: widest, h: blockH };
+        }
+
+        ctx.fillStyle = spec.color;
+        lines.forEach((l, i) => ctx.fillText(l, cx, cy - blockH / 2 + lh * (i + 0.5)));
+        ctx.restore();
+        return box;
+      });
+    });
   }
 
   /* ========================================================================
@@ -1583,6 +1755,7 @@
     // =====================================================================
     if (opts.exportMode === 'molduraStory') {
       renderMolduraComTexto(ctx, W, H, opts);
+      drawExtras(ctx, W, H, opts);
       ctx.restore();
       return canvas;
     }
@@ -1669,6 +1842,8 @@
         renderBalaoClean(ctx, cardX, cardY, cardW, cardH, opts);
         break;
     }
+
+    drawExtras(ctx, W, H, opts);
 
     ctx.restore();
     return canvas;

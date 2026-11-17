@@ -18,7 +18,7 @@
 
   // Estado da aplicação
   const state = {
-    exportMode: 'story', // 'story', 'molduraStory', 'feed', 'card'
+    exportMode: 'molduraStory', // 'molduraStory', 'story', 'feed', 'card'
     model: 'balaoClean',
     molduraKey: 'futurista',
     title: 'POLIMENTO',
@@ -26,7 +26,10 @@
     desc: 'Realce o brilho da pintura e reduza marcas superficiais.',
     price: '',
     oldPrice: '',
-    cta: 'AGENDE SEU SERVIÇO >>',
+    cta: 'AGENDE SEU SERVIÇO',
+    contact: '',
+    // Textos extras adicionados pela pessoa: { id, text, style, x, y }
+    extras: [],
     icon: 'politriz',
     color: BRAND.laranja,
     scale: 1,
@@ -86,6 +89,7 @@
     renderModelOptions();
     renderMolduraOptions();
     renderIconsGrid();
+    setupExtras();
     setupDropzone();
     setupSliders();
     setupInputBindings();
@@ -123,14 +127,15 @@
     $('inpDesc').value = p.desc;
     $('inpPrice').value = p.price || '';
     $('inpOldPrice').value = p.oldPrice || '';
-    $('inpCta').value = p.cta || 'AGENDE SEU SERVIÇO >>';
+    const cta = String(p.cta || 'AGENDE SEU SERVIÇO').replace(/\s*(>>|»)+\s*$/, '');
+    $('inpCta').value = cta;
 
     state.title = p.title;
     state.subtitle = p.subtitle;
     state.desc = p.desc;
     state.price = p.price || '';
     state.oldPrice = p.oldPrice || '';
-    state.cta = p.cta || 'AGENDE SEU SERVIÇO >>';
+    state.cta = cta;
     state.icon = p.icon || 'politriz';
     if (p.model) {
       state.model = p.model;
@@ -145,8 +150,9 @@
   function renderFormatOptions() {
     $$('.format-card').forEach(card => {
       card.onclick = () => {
-        $$('.format-card').forEach(c => c.classList.remove('active'));
+        $$('.format-card').forEach(c => { c.classList.remove('active'); c.setAttribute('aria-checked', 'false'); });
         card.classList.add('active');
+        card.setAttribute('aria-checked', 'true');
         state.exportMode = card.dataset.mode;
         viewport.setAttribute('data-mode', state.exportMode === 'molduraStory' ? 'story' : state.exportMode);
         updateControlsVisibility();
@@ -162,13 +168,9 @@
     Object.entries(MODELS).forEach(([key, m]) => {
       const card = document.createElement('button');
       card.type = 'button';
-      card.className = 'option-card model-card' + (key === state.model ? ' active' : '');
+      card.className = 'style-item model-card' + (key === state.model ? ' active' : '');
       card.dataset.model = key;
-      card.innerHTML = `
-        <span class="option-badge">${m.badge}</span>
-        <strong>${m.label}</strong>
-        <small>${m.description}</small>
-      `;
+      card.innerHTML = `<strong>${m.label}</strong><small>${m.badge.toLowerCase()}</small>`;
       card.onclick = () => {
         state.model = key;
         syncModelCards();
@@ -191,12 +193,12 @@
     Object.entries(MOLDURAS).forEach(([key, m]) => {
       const card = document.createElement('button');
       card.type = 'button';
-      card.className = 'option-card moldura-card' + (key === state.molduraKey ? ' active' : '');
+      card.className = 'frame-card moldura-card' + (key === state.molduraKey ? ' active' : '');
       card.dataset.moldura = key;
+      card.setAttribute('aria-label', 'Moldura ' + m.label);
       card.innerHTML = `
-        <span class="option-badge">STORY 9:16</span>
-        <strong>${m.label}</strong>
-        <small>Moldura original vazada com logo DG</small>
+        <span class="frame-thumb"><img src="${(window.DGMoldurasData && window.DGMoldurasData[key]) || ('assets/molduras/' + encodeURI(m.file))}" alt=""></span>
+        <span class="frame-name">${m.label}</span>
       `;
       card.onclick = () => {
         state.molduraKey = key;
@@ -255,6 +257,9 @@
     const btnRemove = $('btnRemovePhoto');
 
     dropzone.onclick = () => fileInput.click();
+    dropzone.onkeydown = (e) => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fileInput.click(); }
+    };
 
     fileInput.onchange = (e) => {
       const file = e.target.files && e.target.files[0];
@@ -373,21 +378,118 @@
     bindText('inpPrice', 'price');
     bindText('inpOldPrice', 'oldPrice');
     bindText('inpCta', 'cta');
+    bindText('inpContact', 'contact');
 
     $('chkShowLogo').onchange = (e) => {
       state.showLogo = e.target.checked;
       scheduleDraw();
     };
 
-    $('selColor').onchange = (e) => {
-      state.color = e.target.value;
-      scheduleDraw();
+    // Grupos de botões de escolha única (cor e qualidade)
+    const bindSeg = (sel, attr, apply) => {
+      const btns = $$(sel);
+      btns.forEach((b) => {
+        b.onclick = () => {
+          btns.forEach((x) => x.classList.toggle('active', x === b));
+          apply(b.dataset[attr]);
+          scheduleDraw();
+        };
+      });
     };
+    bindSeg('#colorSwatches .swatch', 'color', (v) => { state.color = v; });
+    bindSeg('#resSeg button', 'res', (v) => { state.scale = Number(v) || 1; });
+  }
 
-    $('selResolution').onchange = (e) => {
-      state.scale = Number(e.target.value) || 1;
+  // ==========================================================================
+  // TEXTOS EXTRAS — a pessoa adiciona quantos quiser, em qualquer formato
+  // ==========================================================================
+  const STYLE_LABELS = (window.DG.TEXT_STYLES) || {};
+  let extraSeq = 0;
+
+  function extraLabel(id) {
+    const e = state.extras.find((x) => String(x.id) === String(id));
+    const t = e ? String(e.text || '').replace(/\s+/g, ' ').trim() : '';
+    return t ? (t.length > 16 ? t.slice(0, 15) + '…' : t) : 'Texto extra';
+  }
+
+  function renderExtras() {
+    const list = $('extrasList');
+    list.innerHTML = '';
+    state.extras.forEach((e) => {
+      const row = document.createElement('div');
+      row.className = 'extra-row';
+
+      const inp = document.createElement('input');
+      inp.type = 'text';
+      inp.value = e.text;
+      inp.placeholder = 'Digite o texto';
+      inp.setAttribute('aria-label', 'Texto extra');
+      inp.autocomplete = 'off';
+      inp.oninput = () => { e.text = inp.value; scheduleDraw(); };
+      inp.onfocus = () => select('x:' + e.id);
+
+      const styles = document.createElement('div');
+      styles.className = 'seg seg-xs';
+      styles.setAttribute('role', 'radiogroup');
+      styles.setAttribute('aria-label', 'Estilo do texto');
+      Object.keys(STYLE_LABELS).forEach((k) => {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.textContent = STYLE_LABELS[k].label;
+        b.className = k === e.style ? 'active' : '';
+        b.onclick = () => {
+          e.style = k;
+          styles.querySelectorAll('button').forEach((x) => x.classList.toggle('active', x === b));
+          select('x:' + e.id);
+          scheduleDraw();
+        };
+        styles.appendChild(b);
+      });
+
+      const del = document.createElement('button');
+      del.type = 'button';
+      del.className = 'extra-del';
+      del.setAttribute('aria-label', 'Apagar este texto');
+      del.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>';
+      del.onclick = () => {
+        state.extras = state.extras.filter((x) => x !== e);
+        Object.values(state.layersByMode).forEach((m) => { delete m['x:' + e.id]; });
+        if (state.sel === 'x:' + e.id) state.sel = null;
+        renderExtras();
+        scheduleDraw();
+      };
+
+      const top = document.createElement('div');
+      top.className = 'extra-top';
+      top.appendChild(inp);
+      top.appendChild(del);
+      row.appendChild(top);
+      row.appendChild(styles);
+      list.appendChild(row);
+    });
+  }
+
+  function setupExtras() {
+    $('btnAddText').onclick = () => {
+      const n = state.extras.length;
+      // Na moldura, a parte de cima é foto livre; nos balões, o meio da arte
+      const baseY = state.exportMode === 'molduraStory' ? 0.2 : 0.36;
+      const e = {
+        id: ++extraSeq,
+        text: n === 0 ? 'OFERTA DA SEMANA' : 'NOVO TEXTO',
+        style: n === 0 ? 'etiqueta' : 'destaque',
+        x: 0.5,
+        y: Math.min(0.85, baseY + (n % 6) * 0.08)
+      };
+      state.extras.push(e);
+      renderExtras();
+      state.sel = 'x:' + e.id;
       scheduleDraw();
+      const inputs = $('extrasList').querySelectorAll('input[type="text"]');
+      const last = inputs[inputs.length - 1];
+      if (last) { last.focus(); last.select(); }
     };
+    renderExtras();
   }
 
   // 9. Alternância de Fundo da Prévia
@@ -406,6 +508,7 @@
   // ELEMENTOS MANIPULÁVEIS — legendas, caixas e logo: mover e redimensionar
   // ==========================================================================
   const LAYER_LABELS = window.DG.LAYER_LABELS || {};
+  const labelFor = (k) => (String(k).indexOf('x:') === 0 ? extraLabel(k.slice(2)) : (LAYER_LABELS[k] || k));
   const selBox = $('selBox');
   const selHandle = $('selHandle');
   const selLabel = $('selLabel');
@@ -496,7 +599,7 @@
     selBox.style.top = y + 'px';
     selBox.style.width = (h.x1 - h.x0) * v.k + 'px';
     selBox.style.height = (h.y1 - h.y0) * v.k + 'px';
-    selLabel.textContent = LAYER_LABELS[h.key] || h.key;
+    selLabel.textContent = labelFor(h.key);
     selLabel.style.top = y < 26 ? '2px' : '-22px';
     selBox.hidden = false;
   }
@@ -507,7 +610,7 @@
 
     // Chips de seleção (úteis para elementos pequenos e no celular)
     const keys = hits.slice().sort((a, b) => a.depth - b.depth).map((h) => h.key);
-    const sig = keys.join('|');
+    const sig = keys.map(labelFor).join('|') + '#' + keys.join('|');
     const chips = $('layerChips');
     if (sig !== chipSig) {
       chipSig = sig;
@@ -517,7 +620,7 @@
         b.type = 'button';
         b.className = 'layer-chip';
         b.dataset.key = k;
-        b.textContent = LAYER_LABELS[k] || k;
+        b.textContent = labelFor(k);
         b.onclick = () => select(state.sel === k ? null : k);
         chips.appendChild(b);
       });
@@ -529,6 +632,7 @@
     });
 
     const has = !!state.sel;
+    $('layerBar').classList.toggle('has-sel', has);
     const slider = $('layerScale');
     slider.disabled = !has;
     $('btnLayerReset').disabled = !has;
@@ -537,10 +641,10 @@
       const s = layerOf(state.sel).s;
       slider.value = s;
       $('layerScaleVal').textContent = Math.round(s * 100) + '%';
-      $('layerName').textContent = LAYER_LABELS[state.sel] || state.sel;
+      $('layerName').textContent = labelFor(state.sel);
     } else {
       $('layerScaleVal').textContent = '—';
-      $('layerName').textContent = 'Nenhum elemento selecionado';
+      $('layerName').textContent = 'Nenhum item escolhido';
     }
     updateOverlay();
   }
@@ -893,8 +997,21 @@
 
     $('sectionMoldura').hidden = !isMoldura;
     $('sectionModelos').hidden = isMoldura;
-    $('sectionIcone').hidden = isMoldura;
     $('groupLogo').hidden = isCardOnly || isMoldura;
+    // Moldura: chamada vai ao lado das setas e tem contato; balão: descrição e botão
+    $('groupDesc').hidden = isMoldura;
+    $('groupContact').hidden = !isMoldura;
+    $('lblCta').textContent = isMoldura ? 'Chamada ao lado das setas' : 'Texto do botão';
+    // Só o balão não usa foto: fica só a escolha do fundo
+    $('photoStuff').hidden = isCardOnly;
+
+    const HINTS = {
+      molduraStory: 'Story 1080 × 1920 com a moldura oficial da DG.',
+      story: 'Story 1080 × 1920 com foto, logo e balão do serviço.',
+      feed: 'Post de feed 1080 × 1350 com foto, logo e balão.',
+      card: 'Só o balão, sem fundo, para colar no Canva ou no Story.'
+    };
+    $('formatHint').textContent = HINTS[state.exportMode] || '';
   }
 
   // ==========================================================================

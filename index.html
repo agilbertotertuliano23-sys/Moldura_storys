@@ -5,297 +5,267 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#0B0B0D">
   <title>DG Estética Automotiva — Gerador de Serviços e Preço</title>
-  
+
   <!-- Fontes Oficiais -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Exo+2:ital,wght@0,500;0,700;0,800;0,900;1,700;1,800;1,900&family=Poppins:ital,wght@0,400;0,600;0,700;0,800;0,900;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
-  
+
   <link rel="stylesheet" href="assets/style.css">
 </head>
 <body>
 
   <!-- ======================================================================
-       HEADER / TOPO
+       TOPO
        ====================================================================== -->
   <header class="header">
     <div class="brand">
       <img class="brand-logo" src="assets/logo-dg.png" alt="DG Estética Automotiva">
       <div class="brand-text">
         <h1>DG Estética <span>Automotiva</span></h1>
-        <p>Gerador de Cards, Molduras e Balões de Serviço para Storys e Feed</p>
+        <p>Artes de serviço e preço para Story e Feed</p>
       </div>
-    </div>
-    <div class="header-badges">
-      <span class="badge-tag">Design System Oficial</span>
-      <span class="badge-tag">Offline & Alta Resolução</span>
     </div>
   </header>
 
-  <!-- ======================================================================
-       CONTAINER PRINCIPAL
-       ====================================================================== -->
   <div class="app-container">
 
     <!-- ------------------------------------------------------------------
-         PAINEL ESQUERDO: CONTROLES
+         PAINEL: 4 PASSOS
          ------------------------------------------------------------------ -->
     <aside class="panel">
 
-      <!-- PRESETS RÁPIDOS DE SERVIÇOS -->
-      <div class="presets-bar">
-        <span class="presets-label">⚡ Presets Rápidos de Serviços:</span>
-        <div class="presets-list" id="presetsList"></div>
-      </div>
+      <!-- PASSO 1: MODELO -->
+      <section class="step nav-anchor" id="secFormato">
+        <h2 class="step-title"><span class="step-n">1</span>Escolha o modelo</h2>
 
-      <!-- FORMATO / ENQUADRAMENTO -->
-      <div class="field-group nav-anchor" id="secFormato">
-        <h2 class="section-title">1. Formato & Enquadramento</h2>
-        <div class="options-grid">
-          <button type="button" class="option-card format-card active" data-mode="story">
-            <span class="option-badge">STORY 9:16</span>
-            <strong>Story com Balão</strong>
-            <small>Foto + Logo DG + Balão de Aviso</small>
-          </button>
-          <button type="button" class="option-card format-card" data-mode="molduraStory">
-            <span class="option-badge">OFICIAL DG</span>
-            <strong>Story com Moldura</strong>
-            <small>Usa as molduras vazadas com placa</small>
-          </button>
-          <button type="button" class="option-card format-card" data-mode="feed">
-            <span class="option-badge">FEED 4:5</span>
-            <strong>Post Feed (1080×1350)</strong>
-            <small>Formato clássico do Instagram</small>
-          </button>
-          <button type="button" class="option-card format-card" data-mode="card">
-            <span class="option-badge">TRANSPARENTE</span>
-            <strong>Apenas o Balão (PNG)</strong>
-            <small>Fundo recortado p/ Canva/Instagram</small>
-          </button>
+        <div class="seg seg-format" role="radiogroup" aria-label="Formato">
+          <button type="button" class="format-card active" data-mode="molduraStory" role="radio" aria-checked="true">Moldura</button>
+          <button type="button" class="format-card" data-mode="story" role="radio" aria-checked="false">Story</button>
+          <button type="button" class="format-card" data-mode="feed" role="radio" aria-checked="false">Feed</button>
+          <button type="button" class="format-card" data-mode="card" role="radio" aria-checked="false">Só o balão</button>
         </div>
-      </div>
+        <p class="step-hint" id="formatHint">Story 1080 × 1920 com a moldura oficial da DG.</p>
 
-      <!-- SELETOR DE MOLDURAS OFICIAIS (ATIVO NO MODO MOLDURA) -->
-      <div class="field-group" id="sectionMoldura" hidden>
-        <h2 class="section-title">Moldura Oficial DG</h2>
-        <div class="options-grid" id="molduraOptions"></div>
-      </div>
-
-      <!-- SELETOR DE MODELOS DE BALÃO (ATIVO NOS MODOS STORY, FEED E RECORTE) -->
-      <div class="field-group" id="sectionModelos">
-        <h2 class="section-title">2. Estilo do Balão de Aviso</h2>
-        <div class="options-grid" id="modelOptions"></div>
-      </div>
-
-      <!-- FOTO DE FUNDO & ENQUADRAMENTO -->
-      <div class="field-group nav-anchor" id="sectionFoto">
-        <h2 class="section-title">3. Foto do Carro & Enquadramento</h2>
-        
-        <!-- DROPZONE / UPLOAD -->
-        <input type="file" id="fileInput" accept="image/*,video/*" style="display:none;">
-        <div class="dropzone" id="dropzone">
-          <div class="dropzone-icon">📷 🎬</div>
-          <p>Clique ou arraste uma foto ou um vídeo do carro aqui</p>
-          <small>A foto ou o vídeo se ajusta automaticamente ao Story ou Moldura</small>
+        <div id="sectionMoldura">
+          <div class="frame-grid" id="molduraOptions"></div>
         </div>
 
-        <div class="photo-preview-bar" id="photoPreviewBar" hidden>
-          <img class="photo-thumb" id="photoThumb" src="" alt="Prévia">
-          <div class="photo-info">
-            <strong id="photoName">Foto Selecionada</strong>
-            <small>Enquadrada na área do Story</small>
-          </div>
-          <button type="button" class="btn-remove-photo" id="btnRemovePhoto" title="Remover Foto">✕</button>
+        <div id="sectionModelos" hidden>
+          <div class="style-list" id="modelOptions"></div>
+          <details class="more" id="sectionIcone">
+            <summary>Ícone do balão</summary>
+            <div class="icons-grid" id="iconsGrid"></div>
+          </details>
         </div>
+      </section>
 
-        <!-- CONTROLES DO VÍDEO DE FUNDO (aparecem só com vídeo carregado) -->
-        <div class="video-controls" id="videoControls" hidden>
-          <div class="video-buttons">
-            <button type="button" class="btn btn-secondary" id="btnVideoPlay">⏯ Pausar / tocar</button>
-            <button type="button" class="btn btn-primary" id="btnVideoRec">🎬 Gravar vídeo com os elementos</button>
-          </div>
-          <label class="video-audio">
-            <input type="checkbox" id="chkVideoAudio" checked>
-            <span>Incluir o áudio do vídeo</span>
-          </label>
-          <small>A gravação roda em tempo real, do início ao fim do vídeo — mantenha esta aba aberta e use resolução 1x. Sai em MP4 quando o navegador permite; senão em WebM. “Baixar imagem” salva o quadro atual.</small>
-        </div>
+      <!-- PASSO 2: SERVIÇO E PREÇO -->
+      <section class="step nav-anchor" id="secConteudo">
+        <h2 class="step-title"><span class="step-n">2</span>Serviço e preço</h2>
 
-        <!-- CONTROLES DE ENQUADRAMENTO DA FOTO -->
-        <div class="slider-control" style="margin-top:6px;">
-          <div class="slider-header">
-            <span>Zoom / Escala da Foto:</span>
-            <span class="slider-val" id="valZoom">1.00x</span>
-          </div>
-          <input type="range" id="sliderZoom" min="0.6" max="2.5" step="0.05" value="1.0">
+        <div class="presets-bar">
+          <span class="field-label">Começar de um serviço pronto</span>
+          <div class="presets-list" id="presetsList"></div>
         </div>
 
         <div class="field-row">
-          <div class="slider-control">
-            <div class="slider-header">
-              <span>Posição Horizontal (X):</span>
-              <span class="slider-val" id="valPanX">0px</span>
-            </div>
-            <input type="range" id="sliderPanX" min="-400" max="400" step="10" value="0">
+          <div class="field">
+            <label for="inpTitle">Serviço</label>
+            <input type="text" id="inpTitle" value="POLIMENTO" placeholder="Ex: POLIMENTO" autocomplete="off">
           </div>
-          <div class="slider-control">
-            <div class="slider-header">
-              <span>Posição Vertical (Y):</span>
-              <span class="slider-val" id="valPanY">0px</span>
-            </div>
-            <input type="range" id="sliderPanY" min="-400" max="400" step="10" value="0">
+          <div class="field">
+            <label for="inpSubtitle">Complemento</label>
+            <input type="text" id="inpSubtitle" value="TÉCNICO" placeholder="Ex: TÉCNICO" autocomplete="off">
           </div>
         </div>
 
         <div class="field-row">
-          <div class="slider-control">
-            <div class="slider-header">
-              <span>Escurecimento (Véu):</span>
-              <span class="slider-val" id="valVeu">65%</span>
-            </div>
-            <input type="range" id="sliderVeu" min="0" max="1" step="0.05" value="0.65">
+          <div class="field">
+            <label for="inpPrice">Preço <small>opcional</small></label>
+            <input type="text" id="inpPrice" placeholder="R$ 190,00" autocomplete="off">
           </div>
-          <div class="slider-control">
-            <div class="slider-header">
-              <span>Desfoque de Fundo:</span>
-              <span class="slider-val" id="valBlur">0px</span>
-            </div>
-            <input type="range" id="sliderBlur" min="0" max="20" step="1" value="0">
+          <div class="field">
+            <label for="inpOldPrice">Preço de antes <small>sai riscado</small></label>
+            <input type="text" id="inpOldPrice" placeholder="R$ 250,00" autocomplete="off">
           </div>
         </div>
 
-        <!-- MINIATURAS DE FOTOS DG PARA TESTE RÁPIDO -->
-        <label style="margin-top:4px;">Fotos de Exemplo DG: <small>clique para testar</small></label>
-        <div class="gallery-samples">
-          <img class="sample-thumb active" src="assets/fotos/d09.jpg" data-sample="d09" alt="d09">
-          <img class="sample-thumb" src="assets/fotos/d16.jpg" data-sample="d16" alt="d16">
-          <img class="sample-thumb" src="assets/fotos/d20.jpg" data-sample="d20" alt="d20">
-          <img class="sample-thumb" src="assets/fotos/e02.jpg" data-sample="e02" alt="e02">
-          <img class="sample-thumb" src="assets/fotos/m07.jpg" data-sample="m07" alt="m07">
-          <img class="sample-thumb" src="assets/fotos/m11.jpg" data-sample="m11" alt="m11">
-        </div>
-      </div>
-
-      <!-- ÍCONE DA INSÍGNIA SUPERIOR (NO MODO BALÃO) -->
-      <div class="field-group" id="sectionIcone">
-        <h2 class="section-title">4. Ícone da Insígnia Circular</h2>
-        <div class="icons-grid" id="iconsGrid"></div>
-      </div>
-
-      <!-- TEXTOS DO SERVIÇO -->
-      <div class="field-group nav-anchor" id="secConteudo">
-        <h2 class="section-title">5. Conteúdo do Serviço</h2>
-
-        <div class="field-row">
-          <div>
-            <label>Título do Serviço</label>
-            <input type="text" id="inpTitle" value="POLIMENTO" placeholder="Ex: POLIMENTO">
-          </div>
-          <div>
-            <label>Subtítulo / Categoria</label>
-            <input type="text" id="inpSubtitle" value="TÉCNICO" placeholder="Ex: TÉCNICO">
-          </div>
-        </div>
-
-        <div>
-          <label>Descrição / Benefícios</label>
+        <div class="field" id="groupDesc" hidden>
+          <label for="inpDesc">Descrição</label>
           <textarea id="inpDesc" rows="3" placeholder="Ex: Realce o brilho da pintura e reduza marcas superficiais.">Realce o brilho da pintura e reduza marcas superficiais.</textarea>
         </div>
 
-        <div class="field-row">
-          <div>
-            <label>Preço <small>opcional</small></label>
-            <input type="text" id="inpPrice" placeholder="Ex: A partir de R$ 190,00">
+        <div class="field">
+          <label for="inpCta" id="lblCta">Chamada ao lado das setas</label>
+          <input type="text" id="inpCta" value="AGENDE SEU SERVIÇO" placeholder="Ex: AGENDE JÁ" autocomplete="off">
+        </div>
+
+        <div class="field" id="groupContact">
+          <label for="inpContact">Contato <small>WhatsApp ou @instagram</small></label>
+          <input type="text" id="inpContact" placeholder="Ex: (11) 99999-9999" autocomplete="off">
+        </div>
+
+        <div class="extras">
+          <div class="extras-head">
+            <span class="field-label">Textos extras</span>
+            <small>Arraste na prévia para posicionar</small>
           </div>
-          <div>
-            <label>Preço Antigo <small>riscado</small></label>
-            <input type="text" id="inpOldPrice" placeholder="Ex: R$ 250,00">
+          <div class="extras-list" id="extrasList"></div>
+          <button type="button" class="btn btn-add" id="btnAddText">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+            Adicionar texto
+          </button>
+        </div>
+      </section>
+
+      <!-- PASSO 3: FOTO -->
+      <section class="step nav-anchor" id="sectionFoto">
+        <h2 class="step-title"><span class="step-n">3</span>Foto do carro</h2>
+
+        <div class="seg seg-sm bg-switcher" role="radiogroup" aria-label="Fundo da arte">
+          <button type="button" class="active" data-bg="photo">Foto</button>
+          <button type="button" data-bg="dark">Escuro</button>
+          <button type="button" data-bg="light">Claro</button>
+          <button type="button" data-bg="transparent">Sem fundo</button>
+        </div>
+
+        <div id="photoStuff">
+          <input type="file" id="fileInput" accept="image/*,video/*" hidden>
+          <div class="dropzone" id="dropzone" role="button" tabindex="0">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15V4M7.5 8.5L12 4l4.5 4.5M4.5 15v4.5h15V15"/></svg>
+            <p>Enviar foto ou vídeo do carro</p>
+            <small>Toque para escolher ou arraste o arquivo aqui</small>
+          </div>
+
+          <div class="photo-preview-bar" id="photoPreviewBar" hidden>
+            <img class="photo-thumb" id="photoThumb" src="" alt="Prévia">
+            <div class="photo-info">
+              <strong id="photoName">Foto selecionada</strong>
+              <small>Trocar: escolha outra abaixo ou remova</small>
+            </div>
+            <button type="button" class="btn-remove-photo" id="btnRemovePhoto" aria-label="Remover foto">✕</button>
+          </div>
+
+          <!-- Vídeo de fundo (aparece só com vídeo carregado) -->
+          <div class="video-controls" id="videoControls" hidden>
+            <div class="video-buttons">
+              <button type="button" class="btn btn-secondary" id="btnVideoPlay">Pausar / tocar</button>
+              <button type="button" class="btn btn-primary" id="btnVideoRec">Gravar vídeo com os textos</button>
+            </div>
+            <label class="check">
+              <input type="checkbox" id="chkVideoAudio" checked>
+              <span>Incluir o áudio do vídeo</span>
+            </label>
+            <small>A gravação dura o vídeo inteiro. Deixe esta aba aberta. Sai em MP4 quando o navegador permite, senão em WebM.</small>
+          </div>
+
+          <span class="field-label">Ou use uma foto da DG</span>
+          <div class="gallery-samples">
+            <img class="sample-thumb active" src="assets/fotos/d09.jpg" data-sample="d09" alt="Foto DG d09">
+            <img class="sample-thumb" src="assets/fotos/d16.jpg" data-sample="d16" alt="Foto DG d16">
+            <img class="sample-thumb" src="assets/fotos/d20.jpg" data-sample="d20" alt="Foto DG d20">
+            <img class="sample-thumb" src="assets/fotos/e02.jpg" data-sample="e02" alt="Foto DG e02">
+            <img class="sample-thumb" src="assets/fotos/m07.jpg" data-sample="m07" alt="Foto DG m07">
+            <img class="sample-thumb" src="assets/fotos/m11.jpg" data-sample="m11" alt="Foto DG m11">
+          </div>
+
+          <details class="more">
+            <summary>Ajustar enquadramento</summary>
+            <div class="more-body">
+              <div class="slider-control">
+                <div class="slider-header"><span>Zoom</span><span class="slider-val" id="valZoom">1.00x</span></div>
+                <input type="range" id="sliderZoom" min="0.6" max="2.5" step="0.05" value="1.0" aria-label="Zoom da foto">
+              </div>
+              <div class="field-row">
+                <div class="slider-control">
+                  <div class="slider-header"><span>Lado</span><span class="slider-val" id="valPanX">0px</span></div>
+                  <input type="range" id="sliderPanX" min="-400" max="400" step="10" value="0" aria-label="Posição horizontal">
+                </div>
+                <div class="slider-control">
+                  <div class="slider-header"><span>Altura</span><span class="slider-val" id="valPanY">0px</span></div>
+                  <input type="range" id="sliderPanY" min="-400" max="400" step="10" value="0" aria-label="Posição vertical">
+                </div>
+              </div>
+              <div class="field-row">
+                <div class="slider-control">
+                  <div class="slider-header"><span>Escurecer</span><span class="slider-val" id="valVeu">65%</span></div>
+                  <input type="range" id="sliderVeu" min="0" max="1" step="0.05" value="0.65" aria-label="Escurecer a foto">
+                </div>
+                <div class="slider-control">
+                  <div class="slider-header"><span>Desfocar</span><span class="slider-val" id="valBlur">0px</span></div>
+                  <input type="range" id="sliderBlur" min="0" max="20" step="1" value="0" aria-label="Desfocar a foto">
+                </div>
+              </div>
+            </div>
+          </details>
+        </div>
+      </section>
+
+      <!-- PASSO 4: BAIXAR E ENVIAR -->
+      <section class="step nav-anchor" id="secExportar">
+        <h2 class="step-title"><span class="step-n">4</span>Baixar e enviar</h2>
+
+        <div class="action-buttons">
+          <button type="button" class="btn btn-primary" id="btnDownload">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5v11M7.5 10l4.5 4.5 4.5-4.5M4.5 16.5v3h15v-3"/></svg>
+            Baixar imagem
+          </button>
+          <div class="action-row">
+            <button type="button" class="btn btn-whatsapp" id="btnWhatsApp">WhatsApp</button>
+            <button type="button" class="btn btn-secondary" id="btnCopy">Copiar</button>
           </div>
         </div>
 
-        <div>
-          <label>Chamada do Botão CTA</label>
-          <input type="text" id="inpCta" value="AGENDE SEU SERVIÇO >>" placeholder="Ex: AGENDE SEU SERVIÇO >>">
-        </div>
-      </div>
+        <details class="more">
+          <summary>Cor, qualidade e logo</summary>
+          <div class="more-body">
+            <span class="field-label">Cor de destaque</span>
+            <div class="swatches" id="colorSwatches" role="radiogroup" aria-label="Cor de destaque">
+              <button type="button" class="swatch active" data-color="#FF6A00" style="--c:#FF6A00" aria-label="Laranja DG"></button>
+              <button type="button" class="swatch" data-color="#FF8A2A" style="--c:#FF8A2A" aria-label="Laranja claro"></button>
+              <button type="button" class="swatch" data-color="#FF3800" style="--c:#FF3800" aria-label="Vermelho fogo"></button>
+              <button type="button" class="swatch" data-color="#FFAA00" style="--c:#FFAA00" aria-label="Amarelo dourado"></button>
+              <button type="button" class="swatch" data-color="#FFFFFF" style="--c:#F4F4F6" aria-label="Branco cromo"></button>
+            </div>
 
-      <!-- OPÇÕES DE MARCA & CONFIGURAÇÃO -->
-      <div class="field-group nav-anchor" id="secExportar">
-        <h2 class="section-title">6. Configurações</h2>
+            <span class="field-label">Qualidade do arquivo</span>
+            <div class="seg seg-sm" id="resSeg" role="radiogroup" aria-label="Qualidade">
+              <button type="button" class="active" data-res="1">Normal</button>
+              <button type="button" data-res="1.5">Alta</button>
+              <button type="button" data-res="2">Máxima</button>
+            </div>
 
-        <div class="field-row">
-          <div>
-            <label>Cor de Destaque</label>
-            <select id="selColor">
-              <option value="#FF6A00" selected>Laranja Oficial DG (#FF6A00)</option>
-              <option value="#FF8A2A">Laranja Claro Neon (#FF8A2A)</option>
-              <option value="#FF3800">Vermelho Fogo (#FF3800)</option>
-              <option value="#FFAA00">Amarelo Dourado (#FFAA00)</option>
-              <option value="#FFFFFF">Branco Cromo (#FFFFFF)</option>
-            </select>
+            <label class="check" id="groupLogo" hidden>
+              <input type="checkbox" id="chkShowLogo" checked>
+              <span>Mostrar a logo da DG no topo</span>
+            </label>
           </div>
-          <div>
-            <label>Resolução de Exportação</label>
-            <select id="selResolution">
-              <option value="1" selected>1x Normal (1080 px)</option>
-              <option value="1.5">1.5x Alta (1620 px)</option>
-              <option value="2">2x Retina / 4K (2160 px)</option>
-            </select>
+        </details>
+
+        <details class="more">
+          <summary>Vários serviços de uma vez</summary>
+          <div class="more-body">
+            <p class="step-hint">Uma linha por serviço: <code>Serviço ; Complemento ; Descrição ; Preço ; Chamada</code></p>
+            <textarea id="batchInput" rows="4" placeholder="POLIMENTO ; TÉCNICO ; Realce o brilho da pintura ; R$ 190 ; AGENDE JÁ&#10;VITRIFICAÇÃO ; DE PINTURA ; Proteção cerâmica ; ; PEÇA SEU ORÇAMENTO"></textarea>
+            <button type="button" class="btn btn-secondary" id="btnBatchGo">Baixar todas</button>
           </div>
-        </div>
-
-        <div id="groupLogo" style="margin-top:6px;">
-          <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
-            <input type="checkbox" id="chkShowLogo" checked>
-            <span>Exibir o Logotipo Oficial DG no topo</span>
-          </label>
-        </div>
-      </div>
-
-      <!-- BOTÕES DE AÇÃO -->
-      <div class="action-buttons">
-        <button type="button" class="btn btn-primary" id="btnDownload">
-          <span>📥</span> Baixar Imagem (PNG)
-        </button>
-        <button type="button" class="btn btn-secondary" id="btnCopy">
-          <span>📋</span> Copiar Imagem
-        </button>
-        <button type="button" class="btn btn-whatsapp" id="btnWhatsApp">
-          <span>💬</span> Compartilhar no WhatsApp
-        </button>
-      </div>
-
-      <!-- GERAÇÃO EM LOTE -->
-      <details class="batch-box">
-        <summary>⚡ Gerar vários serviços em lote</summary>
-        <p>Digite uma linha por serviço no padrão: <code>Título ; Subtítulo ; Descrição ; Preço ; CTA</code></p>
-        <textarea id="batchInput" rows="4" placeholder="POLIMENTO ; TÉCNICO ; Realce o brilho da pintura ; A partir de R$ 190 ; AGENDE JÁ >>&#10;VITRIFICAÇÃO ; DE PINTURA ; Proteção cerâmica de alta performance ; ; SOLICITAR ORÇAMENTO"></textarea>
-        <button type="button" class="btn btn-secondary" id="btnBatchGo" style="width:100%; margin-top:8px;">Baixar Todos os Cards</button>
-      </details>
+        </details>
+      </section>
 
     </aside>
 
     <!-- ------------------------------------------------------------------
-         PAINEL DIREITO: STAGE / PRÉVIA AO VIVO
+         PRÉVIA AO VIVO
          ------------------------------------------------------------------ -->
     <main class="stage nav-anchor" id="secPrevia">
 
       <div class="stage-toolbar">
-        <div class="stage-title">
-          <strong>Prévia ao Vivo</strong>
-          <small class="hint-mouse">Arraste, amplie e confira o enquadramento</small>
-          <small class="hint-touch">Toque num texto ou caixa para mover</small>
-        </div>
-
-        <div class="bg-switcher">
-          <button type="button" class="active" data-bg="photo">Foto</button>
-          <button type="button" data-bg="dark">Escuro</button>
-          <button type="button" data-bg="light">Claro</button>
-          <button type="button" data-bg="transparent">Transparente</button>
-        </div>
+        <strong>Prévia</strong>
+        <small class="hint-mouse">Clique num texto da prévia para mover ou ampliar</small>
+        <small class="hint-touch">Toque num texto da prévia para mover</small>
       </div>
 
-      <!-- VIEWPORT DO CANVAS -->
       <div class="canvas-viewport" id="canvasViewport" data-mode="story">
         <canvas id="mainCanvas"></canvas>
         <div class="sel-box" id="selBox" hidden>
@@ -306,30 +276,30 @@
 
       <p class="canvas-meta" id="canvasMeta">Carregando...</p>
 
-      <!-- AJUSTE DE ELEMENTOS (legendas, caixas, logo) -->
+      <!-- AJUSTE DE ELEMENTOS -->
       <div class="layer-bar" id="layerBar">
         <div class="layer-head">
-          <strong>✋ Ajuste de elementos</strong>
-          <small class="hint-mouse">Clique num texto ou caixa da prévia e arraste para mover. Puxe a bolinha do canto, use a roda do mouse ou o controle abaixo para aumentar/diminuir. Duplo clique devolve ao lugar.</small>
-          <small class="hint-touch">Toque num texto ou caixa e arraste para mover. Para aumentar ou diminuir, faça pinça com dois dedos, puxe a bolinha do canto ou use o controle abaixo. Fora dos elementos, o dedo rola a página.</small>
+          <strong>Mover e ajustar</strong>
+          <small class="hint-mouse">Escolha um item ou clique nele na prévia. Arraste para mover; roda do mouse ou bolinha do canto para o tamanho; duplo clique devolve ao lugar.</small>
+          <small class="hint-touch">Escolha um item ou toque nele na prévia. Arraste para mover; pinça com dois dedos para o tamanho. Fora dos textos, o dedo rola a página.</small>
         </div>
         <div class="layer-chips" id="layerChips"></div>
-        <div class="layer-controls">
-          <span class="layer-name" id="layerName">Nenhum elemento selecionado</span>
+        <div class="layer-controls" id="layerControls">
+          <span class="layer-name" id="layerName">Nenhum item escolhido</span>
           <div class="layer-size">
             <span>Tamanho</span>
-            <input type="range" id="layerScale" min="0.25" max="3" step="0.01" value="1" disabled>
+            <input type="range" id="layerScale" min="0.25" max="3" step="0.01" value="1" disabled aria-label="Tamanho do item">
             <span class="slider-val" id="layerScaleVal">—</span>
           </div>
           <div class="nudge-pad" aria-label="Posição">
-            <button type="button" class="nudge-btn" data-nx="0" data-ny="-1" disabled title="Subir">▲</button>
-            <button type="button" class="nudge-btn" data-nx="-1" data-ny="0" disabled title="Esquerda">◀</button>
-            <button type="button" class="nudge-btn" data-nx="1" data-ny="0" disabled title="Direita">▶</button>
-            <button type="button" class="nudge-btn" data-nx="0" data-ny="1" disabled title="Descer">▼</button>
+            <button type="button" class="nudge-btn" data-nx="0" data-ny="-1" disabled aria-label="Subir">▲</button>
+            <button type="button" class="nudge-btn" data-nx="-1" data-ny="0" disabled aria-label="Esquerda">◀</button>
+            <button type="button" class="nudge-btn" data-nx="1" data-ny="0" disabled aria-label="Direita">▶</button>
+            <button type="button" class="nudge-btn" data-nx="0" data-ny="1" disabled aria-label="Descer">▼</button>
           </div>
           <div class="layer-actions">
-            <button type="button" class="btn btn-secondary" id="btnLayerReset" disabled>Resetar elemento</button>
-            <button type="button" class="btn btn-secondary" id="btnLayerResetAll">Resetar tudo</button>
+            <button type="button" class="btn btn-secondary" id="btnLayerReset" disabled>Voltar ao lugar</button>
+            <button type="button" class="btn btn-secondary" id="btnLayerResetAll">Voltar tudo</button>
           </div>
         </div>
       </div>
@@ -347,19 +317,19 @@
     </a>
     <a href="#secFormato" data-target="secFormato">
       <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.5"/></svg>
-      <span>Formato</span>
-    </a>
-    <a href="#sectionFoto" data-target="sectionFoto">
-      <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2.5"/><circle cx="8.5" cy="10" r="1.6"/><path d="M21 16l-5-5-8 8"/></svg>
-      <span>Foto</span>
+      <span>Modelo</span>
     </a>
     <a href="#secConteudo" data-target="secConteudo">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 6V4.5h14V6M12 4.5v15M9 19.5h6"/></svg>
       <span>Texto</span>
     </a>
+    <a href="#sectionFoto" data-target="sectionFoto">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2.5"/><circle cx="8.5" cy="10" r="1.6"/><path d="M21 16l-5-5-8 8"/></svg>
+      <span>Foto</span>
+    </a>
     <a href="#secExportar" data-target="secExportar" class="mnav-accent">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5v11M7.5 10l4.5 4.5 4.5-4.5M4.5 16.5v3h15v-3"/></svg>
-      <span>Exportar</span>
+      <span>Baixar</span>
     </a>
   </nav>
 
@@ -368,23 +338,20 @@
   </button>
 
   <!-- ======================================================================
-       MODAL WHATSAPP
+       COMPARTILHAR (folha inferior no celular)
        ====================================================================== -->
   <div class="modal-overlay" id="modalWhatsApp" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
     <div class="modal-card">
       <div class="modal-header">
-        <h3 id="modalTitle">Imagem Pronta para Compartilhar</h3>
+        <h3 id="modalTitle">Pronta para enviar</h3>
         <button type="button" class="modal-close" id="modalClose" aria-label="Fechar">✕</button>
       </div>
       <img class="modal-preview-img" id="modalPreviewImg" src="" alt="Prévia">
-      <button type="button" class="btn btn-whatsapp" id="modalShare">
-        <span>💬</span> Compartilhar Agora
-      </button>
-      <p class="modal-hint">No celular, toque e segure a imagem e escolha <b>Salvar Imagem</b> para enviar direto no WhatsApp.</p>
+      <button type="button" class="btn btn-whatsapp" id="modalShare">Compartilhar agora</button>
+      <p class="modal-hint">Se o botão não abrir o WhatsApp, toque e segure a imagem e escolha <b>Salvar imagem</b>.</p>
     </div>
   </div>
 
-  <!-- Scripts -->
   <script src="assets/render.js"></script>
   <script src="assets/app.js"></script>
 </body>
