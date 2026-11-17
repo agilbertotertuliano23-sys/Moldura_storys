@@ -1625,3 +1625,6 @@ details.more > .icons-grid { padding: 2px 14px 14px; }
   .modal-preview-img { max-height: 54vh; }
   .modal-hint { font-size: 13px; line-height: 1.45; }
 }
+
+/* Opção dos quadrados atrás do texto, logo abaixo das molduras */
+#groupBoxes { margin-top: 12px; }

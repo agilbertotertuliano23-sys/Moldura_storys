@@ -1450,7 +1450,9 @@
       ctx.stroke();
       ctx.restore();
     }
-    if (plate.bg) drawBackdrop(px, py, pw, ph);
+    // Quadrado escuro atrás do texto: só quando a pessoa liga a opção
+    const boxes = !!opts.plateBoxes;
+    if (plate.bg && boxes) drawBackdrop(px, py, pw, ph);
 
     drawPlateText(ctx, px, py, pw, ph, opts);
 
@@ -1464,7 +1466,7 @@
       const sy = side.y * scaleY;
       const sw = side.w * scaleX;
       const sh = side.h * scaleY;
-      if (side.bg) drawBackdrop(sx, sy, sw, sh);
+      if (side.bg && boxes) drawBackdrop(sx, sy, sw, sh);
       drawSideText(ctx, sx, sy, sw, sh, side.align, cta, contact, opts, side.bg ? 20 : 0);
     }
   }

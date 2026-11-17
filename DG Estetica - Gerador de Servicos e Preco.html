@@ -1640,6 +1640,9 @@ details.more > .icons-grid { padding: 2px 14px 14px; }
   .modal-hint { font-size: 13px; line-height: 1.45; }
 }
 
+/* Opção dos quadrados atrás do texto, logo abaixo das molduras */
+#groupBoxes { margin-top: 12px; }
+
 </style>
 </head>
 <body>
@@ -1678,6 +1681,10 @@ details.more > .icons-grid { padding: 2px 14px 14px; }
 
         <div id="sectionMoldura">
           <div class="frame-grid" id="molduraOptions"></div>
+          <label class="check" id="groupBoxes">
+            <input type="checkbox" id="chkPlateBoxes">
+            <span>Quadrados escuros atrás do texto</span>
+          </label>
         </div>
 
         <div id="sectionModelos" hidden>
@@ -3444,7 +3451,9 @@ details.more > .icons-grid { padding: 2px 14px 14px; }
       ctx.stroke();
       ctx.restore();
     }
-    if (plate.bg) drawBackdrop(px, py, pw, ph);
+    // Quadrado escuro atrás do texto: só quando a pessoa liga a opção
+    const boxes = !!opts.plateBoxes;
+    if (plate.bg && boxes) drawBackdrop(px, py, pw, ph);
 
     drawPlateText(ctx, px, py, pw, ph, opts);
 
@@ -3458,7 +3467,7 @@ details.more > .icons-grid { padding: 2px 14px 14px; }
       const sy = side.y * scaleY;
       const sw = side.w * scaleX;
       const sh = side.h * scaleY;
-      if (side.bg) drawBackdrop(sx, sy, sw, sh);
+      if (side.bg && boxes) drawBackdrop(sx, sy, sw, sh);
       drawSideText(ctx, sx, sy, sw, sh, side.align, cta, contact, opts, side.bg ? 20 : 0);
     }
   }
@@ -4025,6 +4034,7 @@ details.more > .icons-grid { padding: 2px 14px 14px; }
     logoImage: null,
     molduraImages: {},
     balaoImages: {},
+    plateBoxes: false, // quadrados escuros atrás do texto nas molduras premium
     // Elementos manipuláveis: { modo: { chave: {dx, dy, s} } } e a seleção atual
     layersByMode: {},
     sel: null,
@@ -4407,6 +4417,10 @@ details.more > .icons-grid { padding: 2px 14px 14px; }
     bindText('inpCta', 'cta');
     bindText('inpContact', 'contact');
 
+    $('chkPlateBoxes').onchange = (e) => {
+      state.plateBoxes = e.target.checked;
+      scheduleDraw();
+    };
     $('chkShowLogo').onchange = (e) => {
       state.showLogo = e.target.checked;
       scheduleDraw();

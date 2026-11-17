@@ -46,6 +46,7 @@
     logoImage: null,
     molduraImages: {},
     balaoImages: {},
+    plateBoxes: false, // quadrados escuros atrás do texto nas molduras premium
     // Elementos manipuláveis: { modo: { chave: {dx, dy, s} } } e a seleção atual
     layersByMode: {},
     sel: null,
@@ -428,6 +429,10 @@
     bindText('inpCta', 'cta');
     bindText('inpContact', 'contact');
 
+    $('chkPlateBoxes').onchange = (e) => {
+      state.plateBoxes = e.target.checked;
+      scheduleDraw();
+    };
     $('chkShowLogo').onchange = (e) => {
       state.showLogo = e.target.checked;
       scheduleDraw();
